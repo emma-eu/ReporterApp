@@ -13,10 +13,9 @@ export default function InteractiveReporterApp() {
   useEffect(() => {
     const loadMap = async () => {
       // Dynamically import ArcGIS modules
-      const [MapView, WebMap, FeatureLayer] = await Promise.all([
+      const [MapView, WebMap] = await Promise.all([
         import("@arcgis/core/views/MapView"),
         import("@arcgis/core/WebMap"),
-        import("@arcgis/core/layers/FeatureLayer"),
       ]);
 
       // Create a web map using your ArcGIS Online web map ID
