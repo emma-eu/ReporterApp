@@ -8,27 +8,22 @@ import Box from "@mui/material/Box";
 // Main component for the interactive map with commenting functionality
 export default function InteractiveReporterApp() {
   const mapRef = useRef(null); // Reference to the map container div
-  const [, setView] = useState(null); // Store the map view instance
+  const [, setView] = useState(null); // No need to store the view if not used
 
   useEffect(() => {
     const loadMap = async () => {
       // Dynamically import ArcGIS modules
-      const [MapView, WebMap, Graphic, GraphicsLayer] = await Promise.all([
+      const [MapView, WebMap, FeatureLayer] = await Promise.all([
         import("@arcgis/core/views/MapView"),
         import("@arcgis/core/WebMap"),
-        import("@arcgis/core/Graphic"),
-        import("@arcgis/core/layers/GraphicsLayer"),
+        import("@arcgis/core/layers/FeatureLayer"),
       ]);
-
-      // Create a graphics layer to hold user comments
-      const graphicsLayer = new GraphicsLayer.default();
 
       // Create a web map using your ArcGIS Online web map ID
       const webmap = new WebMap.default({
         portalItem: {
           id: "193de866247a4946a17331d2fdefc294", // Replace with your actual webmap ID
         },
-        layers: [graphicsLayer], // Add the graphics layer to the map
       });
 
       // Initialize the map view
@@ -39,39 +34,44 @@ export default function InteractiveReporterApp() {
         zoom: 10,
       });
 
-      setView(view); // Store view in state if needed elsewhere
+      setView(view);
 
-      // Add click event listener to the map view
-      view.on("click", async (event) => {
-        const comment = prompt("Enter your comment about this location:"); // Prompt user for comment
+      // Wait for the view to load before interacting with layers
+      view.when(() => {
+        // Find the feature layer named "Comments"
+        const commentsLayer = webmap.allLayers.find(
+          (layer) => layer.title === "Comments"
+        );
 
-        if (comment) {
-          // Create a graphic with the comment and location
-          const pointGraphic = new Graphic.default({
-            geometry: event.mapPoint,
-            symbol: {
-              type: "simple-marker",
-              style: "circle",
-              color: "#0079c1",
-              size: "10px",
-              outline: {
-                color: "white",
-                width: 1,
-              },
-            },
-            attributes: {
-              comment,
-              created_at: new Date().toISOString(),
-            },
-            popupTemplate: {
-              title: "User Comment",
-              content: "{comment}"
-            },
-          });
-
-          // Add the graphic to the graphics layer
-          graphicsLayer.add(pointGraphic);
+        if (!commentsLayer) {
+          alert("The 'Comments' layer was not found in the map. Make sure it is added and shared properly.");
+          return;
         }
+
+        view.on("click", async (event) => {
+          const comment = prompt("Enter your comment about this location:"); // Prompt user for comment
+
+          if (comment) {
+            const newFeature = {
+              geometry: event.mapPoint,
+              attributes: {
+                comment,
+                created_at: new Date().toISOString(),
+              },
+            };
+
+            commentsLayer.applyEdits({
+              addFeatures: [newFeature],
+            }).then((result) => {
+              if (result.addFeatureResults.length > 0 && !result.addFeatureResults[0].error) {
+                alert("Comment added successfully!");
+              } else {
+                alert("Failed to add comment.");
+                console.error(result);
+              }
+            });
+          }
+        });
       });
     };
 
@@ -86,7 +86,7 @@ export default function InteractiveReporterApp() {
           Interactive Community Feedback Map
         </Typography>
         <Typography variant="body1" gutterBottom>
-          Click anywhere on the map to leave a comment about that location. Your feedback will appear as a point on the map with your message.
+          Click anywhere on the map to leave a comment about that location. Your feedback will be saved to the Comments layer.
         </Typography>
 
         {/* Map container */}
@@ -98,7 +98,7 @@ export default function InteractiveReporterApp() {
 
         {/* Disclaimer and reset button */}
         <Typography variant="caption" display="block" gutterBottom>
-          Comments are stored temporarily in this session. For long-term storage or integration with ArcGIS layers, contact your GIS admin.
+          Comments are stored in the hosted Comments layer. For long-term access or downloads, use ArcGIS Online.
         </Typography>
 
         <Box pt={2}>
