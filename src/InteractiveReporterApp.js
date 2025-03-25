@@ -26,7 +26,7 @@ export default function InteractiveReporterApp() {
       // Create a web map using your ArcGIS Online web map ID
       const webmap = new WebMap.default({
         portalItem: {
-          id: "933451293e464f298c030256db913fe3", // Replace with your actual webmap ID
+          id: "f2e9b762544945f390ca4ac3671cfa72", // Replace with your actual webmap ID
         },
         layers: [graphicsLayer], // Add the graphics layer to the map
       });
