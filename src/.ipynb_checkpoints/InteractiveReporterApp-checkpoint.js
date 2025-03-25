@@ -8,7 +8,7 @@ import Box from "@mui/material/Box";
 // Main component for the interactive map with commenting functionality
 export default function InteractiveReporterApp() {
   const mapRef = useRef(null); // Reference to the map container div
-  const [view, setView] = useState(null); // Store the map view instance
+  const [, setView] = useState(null); // Store the map view instance
 
   useEffect(() => {
     const loadMap = async () => {
@@ -43,7 +43,6 @@ export default function InteractiveReporterApp() {
 
       // Add click event listener to the map view
       view.on("click", async (event) => {
-        const { latitude, longitude } = event.mapPoint;
         const comment = prompt("Enter your comment about this location:"); // Prompt user for comment
 
         if (comment) {
