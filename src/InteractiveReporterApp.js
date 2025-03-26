@@ -29,7 +29,7 @@ export default function InteractiveReporterApp() {
   const [name, setName] = useState(""); // Stores user input name
   const [comment, setComment] = useState(""); // Stores user comment
   const [likesProject, setLikesProject] = useState(false); // Checkbox: user supports project?
-  const [projectConcern, setProjectConcern] = useState({ noise: false, traffic: false, environment: false }); // Checkboxes: concerns
+  const [projectConcern, setProjectConcern] = useState({ Metropolitan: false, Urban: false, City: false, Neighborhood: false }); // Checkboxes: concerns
   const [priorityLevel, setPriorityLevel] = useState(""); // Dropdown: priority level
 
   useEffect(() => {
@@ -50,7 +50,7 @@ export default function InteractiveReporterApp() {
         container: mapRef.current, // Mount the map to this DOM node
         map: webmap,
         center: [-111.787301, 40.221715], // Map center
-        zoom: 9,
+        zoom: 11,
       });
 
       setView(view); // Save view instance to state if needed
@@ -97,9 +97,10 @@ export default function InteractiveReporterApp() {
         name,
         comment,
         likes_project: likesProject ? 1 : 0,
-        concern_noise: projectConcern.noise ? 1 : 0,
-        concern_traffic: projectConcern.traffic ? 1 : 0,
-        concern_environment: projectConcern.environment ? 1 : 0,
+        concern_Metropolitan: projectConcern.Metropolitan ? 1 : 0,
+        concern_Urban: projectConcern.Urban ? 1 : 0,
+        concern_City: projectConcern.City ? 1 : 0,
+        concern_Neighborhood: projectConcern.Neighborhood ? 1 : 0, 
         priority_level: priorityLevel,
         related_feature_id: selectedFeature.attributes.OBJECTID, // Link response to selected feature
         submitted_at: new Date().toISOString(),
@@ -185,25 +186,29 @@ export default function InteractiveReporterApp() {
                 label="This center is correctly classified"
               />
               <FormGroup>
-                <Typography variant="subtitle1">Concerns</Typography>
+                <Typography variant="subtitle1">If the center is incorrectly classified, please select the correct classification</Typography>
                 <FormControlLabel
-                  control={<Checkbox checked={projectConcern.noise} onChange={(e) => setProjectConcern(prev => ({ ...prev, noise: e.target.checked }))} />}
-                  label="Noise"
+                  control={<Checkbox checked={projectConcern.Metropolitan} onChange={(e) => setProjectConcern(prev => ({ ...prev, Metropolitan: e.target.checked }))} />}
+                  label="Metropolitan"
                 />
                 <FormControlLabel
-                  control={<Checkbox checked={projectConcern.traffic} onChange={(e) => setProjectConcern(prev => ({ ...prev, traffic: e.target.checked }))} />}
-                  label="Traffic"
+                  control={<Checkbox checked={projectConcern.Urban} onChange={(e) => setProjectConcern(prev => ({ ...prev, Urban: e.target.checked }))} />}
+                  label="Urban"
                 />
                 <FormControlLabel
-                  control={<Checkbox checked={projectConcern.environment} onChange={(e) => setProjectConcern(prev => ({ ...prev, environment: e.target.checked }))} />}
-                  label="Environmental Impact"
+                  control={<Checkbox checked={projectConcern.City} onChange={(e) => setProjectConcern(prev => ({ ...prev, city: e.target.checked }))} />}
+                  label="City"
+                />
+                <FormControlLabel
+                  control={<Checkbox checked={projectConcern.Neighborhood} onChange={(e) => setProjectConcern(prev => ({ ...prev, Neighborhood: e.target.checked }))} />}
+                  label="Neighborhood"
                 />
               </FormGroup>
               <FormControl fullWidth margin="dense">
                 <InputLabel>Project Priority</InputLabel>
                 <Select
                   value={priorityLevel}
-                  onChange={(e) => setPriorityLevel(e.target.value)}
+                  onChange={(e) => setPriorityLevel(e.target.value)}git add 
                   label="Project Priority"
                 >
                   <MenuItem value="High">High</MenuItem>
