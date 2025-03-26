@@ -147,7 +147,7 @@ export default function InteractiveReporterApp() {
 
         {/* Map and legend container */}
         <Card sx={{ my: 2 }}>
-          <CardContent sx={{ height: 900, display: 'flex' }}>{/*600*/}
+          <CardContent sx={{ height: 750, display: 'flex' }}>{/*600*/}
             <div ref={mapRef} style={{ width: "80%", height: "100%", borderRadius: 8 }} />
             <div
               ref={legendRef}
