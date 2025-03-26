@@ -27,6 +27,7 @@ export default function InteractiveReporterApp() {
   const [open, setOpen] = useState(false); // Controls visibility of feedback form
   const [selectedFeature, setSelectedFeature] = useState(null); // Stores clicked map feature
   const [name, setName] = useState(""); // Stores user input name
+  const [organization, setOrganization] = useState("");
   const [comment, setComment] = useState(""); // Stores user comment
   const [isCenter, setisCenter] = useState(false);//Checkbox: this feature is truly a center
   const [likesProject, setLikesProject] = useState(false); // Checkbox: this center is classified correctly
@@ -96,9 +97,10 @@ export default function InteractiveReporterApp() {
       geometry: selectedFeature.geometry,
       attributes: {
         name,
+        organization,
         comment,
-        likes_project: likesProject ? 1 : 0,
-        priority_level: priorityLevel,
+        correct_type: likesProject ? 1 : 0,
+        updated_type: priorityLevel,
         related_feature_id: selectedFeature.attributes.OBJECTID, // Link response to selected feature
         submitted_at: new Date().toISOString(),
       },
@@ -166,8 +168,8 @@ export default function InteractiveReporterApp() {
                 label="Your City/Organization"
                 fullWidth
                 margin="dense"
-                value={name} // Optional: Create a new state variable if separate
-                onChange={(e) => setName(e.target.value)}
+                value={organization} // Optional: Create a new state variable if separate
+                onChange={(e) => setOrganization(e.target.value)}
               />
               <TextField
                 label="Add Your Comment Here"
@@ -178,6 +180,13 @@ export default function InteractiveReporterApp() {
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
               />
+              <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
+              A center is defined as xyz with these characteristics...
+              </Typography>
+              <FormControlLabel
+                control={<Checkbox checked={isCenter} onChange={(e) => setisCenter(e.target.checked)} />}
+                label="This feature meets the characteristics of a center as defined above."
+              />
               <FormControlLabel
                 control={<Checkbox checked={likesProject} onChange={(e) => setLikesProject(e.target.checked)} />}
                 label="This center is correctly classified"
@@ -186,10 +195,10 @@ export default function InteractiveReporterApp() {
                 <Typography variant="subtitle1">If the center is incorrectly classified, please select the correct classification from the options below</Typography>
               </FormGroup>
               <FormControl fullWidth margin="dense">
-                <InputLabel>Project Priority</InputLabel>
+                <InputLabel>Centers Options</InputLabel>
                 <Select
                   value={priorityLevel}
-                  onChange={(e) => setPriorityLevel(e.target.value)}git add 
+                  onChange={(e) => setPriorityLevel(e.target.value)}
                   label="Centers Options"
                 >
                   <MenuItem value="Metropolitan">High</MenuItem>
