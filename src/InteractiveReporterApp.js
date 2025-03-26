@@ -28,7 +28,8 @@ export default function InteractiveReporterApp() {
   const [selectedFeature, setSelectedFeature] = useState(null); // Stores clicked map feature
   const [name, setName] = useState(""); // Stores user input name
   const [comment, setComment] = useState(""); // Stores user comment
-  const [likesProject, setLikesProject] = useState(false); // Checkbox: user supports project?
+  const [isCenter, setisCenter] = useState(false);//Checkbox: this feature is truly a center
+  const [likesProject, setLikesProject] = useState(false); // Checkbox: this center is classified correctly
   //const [projectConcern, setProjectConcern] = useState({ Metropolitan: false, Urban: false, City: false, Neighborhood: false }); // Checkboxes: concerns
   const [priorityLevel, setPriorityLevel] = useState(""); // Dropdown: priority level
 
@@ -125,7 +126,7 @@ export default function InteractiveReporterApp() {
     setName("");
     setComment("");
     setLikesProject(false);
-    setProjectConcern({ noise: false, traffic: false, environment: false });
+    //setProjectConcern({ noise: false, traffic: false, environment: false });
     setPriorityLevel("");
     setSelectedFeature(null);
   };
@@ -169,7 +170,7 @@ export default function InteractiveReporterApp() {
                 onChange={(e) => setName(e.target.value)}
               />
               <TextField
-                label="Your Comment"
+                label="Add Your Comment Here"
                 fullWidth
                 margin="dense"
                 multiline
