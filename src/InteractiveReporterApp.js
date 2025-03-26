@@ -139,7 +139,7 @@ export default function InteractiveReporterApp() {
       <Box width="100%" maxWidth="1000px">
         {/* Title and instructions */}
         <Typography variant="h4" gutterBottom>
-          Interactive Community Feedback Map
+          MAG First Draft Centers Map Feedback
         </Typography>
         <Typography variant="body1" gutterBottom>
           Click a feature on the map to leave feedback directly tied to that location.
@@ -182,7 +182,7 @@ export default function InteractiveReporterApp() {
                 onChange={(e) => setComment(e.target.value)}
               />
               <Typography variant="body1" color="textSecondary" sx={{ mb: 2 }}>
-              A center is defined as xyz with these characteristics...
+              A center is defined as a walkable area where activity is focused, with places to live, work, and play. The characteristics of centers enable more people in a community to choose transportation options like walking, bicycling, and public transportation. 
               </Typography>
               <FormControlLabel
                 control={<Checkbox checked={isCenter} onChange={(e) => setisCenter(e.target.checked)} />}
