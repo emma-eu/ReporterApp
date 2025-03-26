@@ -62,10 +62,10 @@ export default function InteractiveReporterApp() {
           legend.container = legendRef.current;
         }
 
-        // Click handler: check if user clicked a "Projects" feature
+        // Click handler: check if user clicked any feature (not limited to layer title)
         view.on("click", async (event) => {
           const response = await view.hitTest(event); // Check what was clicked
-          const result = response.results.find((r) => r.graphic?.layer?.title === "Projects" && r.graphic.attributes);
+          const result = response.results.find((r) => r.graphic?.attributes); // Match any feature with attributes
           if (result) {
             setSelectedFeature(result.graphic); // Save clicked feature
             setOpen(true); // Open form dialog
@@ -101,7 +101,7 @@ export default function InteractiveReporterApp() {
         concern_traffic: projectConcern.traffic ? 1 : 0,
         concern_environment: projectConcern.environment ? 1 : 0,
         priority_level: priorityLevel,
-        related_feature_id: selectedFeature.attributes.OBJECTID, // Link response to selected project
+        related_feature_id: selectedFeature.attributes.OBJECTID, // Link response to selected feature
         submitted_at: new Date().toISOString(),
       },
     };
@@ -141,7 +141,7 @@ export default function InteractiveReporterApp() {
           Interactive Community Feedback Map
         </Typography>
         <Typography variant="body1" gutterBottom>
-          Click a project on the map to leave feedback directly tied to that location.
+          Click a feature on the map to leave feedback directly tied to that location.
         </Typography>
 
         {/* Map and legend container */}
@@ -154,7 +154,7 @@ export default function InteractiveReporterApp() {
 
         {/* Feedback Form Modal */}
         <Dialog open={open} onClose={() => setOpen(false)}>
-          <DialogTitle>Project Feedback</DialogTitle>
+          <DialogTitle>Feature Feedback</DialogTitle>
           <DialogContent>
             {/* Name field */}
             <TextField
@@ -162,6 +162,14 @@ export default function InteractiveReporterApp() {
               fullWidth
               margin="dense"
               value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+            {/*City field*/}
+            <TextField
+              label="Your City/Organization"
+              fullWidth
+              margin="dense"
+              value={name} // Optional: Create a new state variable if separate
               onChange={(e) => setName(e.target.value)}
             />
             {/* Comment field */}
@@ -177,7 +185,7 @@ export default function InteractiveReporterApp() {
             {/* Support checkbox */}
             <FormControlLabel
               control={<Checkbox checked={likesProject} onChange={(e) => setLikesProject(e.target.checked)} />}
-              label="I support this project"
+              label="This center is correctly classified"
             />
             {/* Concerns checkboxes */}
             <FormGroup>
@@ -210,6 +218,7 @@ export default function InteractiveReporterApp() {
             </FormControl>
           </DialogContent>
           <DialogActions>
+            {/* Cancel button to close dialog without submitting */}
             <Button onClick={() => setOpen(false)}>Cancel</Button>
             <Button onClick={handleSubmit} variant="contained" color="primary">
               Submit Feedback
