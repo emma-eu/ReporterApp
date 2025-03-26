@@ -98,7 +98,8 @@ export default function InteractiveReporterApp() {
       attributes: {
         name,
         organization,
-        comment,
+        comment, 
+        is_center: isCenter ? 1 : 0,
         correct_type: likesProject ? 1 : 0,
         updated_type: priorityLevel,
         related_feature_id: selectedFeature.attributes.OBJECTID, // Link response to selected feature
@@ -195,11 +196,11 @@ export default function InteractiveReporterApp() {
                 <Typography variant="subtitle1">If the center is incorrectly classified, please select the correct classification from the options below</Typography>
               </FormGroup>
               <FormControl fullWidth margin="dense">
-                <InputLabel>Centers Options</InputLabel>
+                <InputLabel id="center-label">Center Classification</InputLabel>
                 <Select
+                  labelId="center-label"
                   value={priorityLevel}
                   onChange={(e) => setPriorityLevel(e.target.value)}
-                  label="Centers Options"
                 >
                   <MenuItem value="Metropolitan">Metropolitan</MenuItem>
                   <MenuItem value="Urban">Urban</MenuItem>
