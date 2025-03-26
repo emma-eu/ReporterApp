@@ -180,7 +180,7 @@ export default function InteractiveReporterApp() {
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
               />
-              <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
+              <Typography variant="body1" color="textSecondary" sx={{ mb: 2 }}>
               A center is defined as xyz with these characteristics...
               </Typography>
               <FormControlLabel
@@ -201,11 +201,11 @@ export default function InteractiveReporterApp() {
                   onChange={(e) => setPriorityLevel(e.target.value)}
                   label="Centers Options"
                 >
-                  <MenuItem value="Metropolitan">High</MenuItem>
-                  <MenuItem value="Urban">Medium</MenuItem>
-                  <MenuItem value="City">Low</MenuItem>
-                  <MenuItem value="Neighborhood">Zero</MenuItem>
-                  <MenuItem value="NOT A CENTER">Minus</MenuItem>
+                  <MenuItem value="Metropolitan">Metropolitan</MenuItem>
+                  <MenuItem value="Urban">Urban</MenuItem>
+                  <MenuItem value="City">City</MenuItem>
+                  <MenuItem value="Neighborhood">Neighborhood</MenuItem>
+                  <MenuItem value="NOT A CENTER">This is not a center</MenuItem>
                 </Select>
               </FormControl>
             </DialogContent>
