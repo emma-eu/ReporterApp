@@ -4,7 +4,7 @@ import CardContent from "@mui/material/CardContent"; // Content container for Ca
 import Button from "@mui/material/Button"; // Material UI button
 import Typography from "@mui/material/Typography"; // Typography for headers and text
 import Box from "@mui/material/Box"; // Layout component for flexible styling
-import Dialog from "@mui/material/Dialog"; // Modal dialog component
+import Drawer from "@mui/material/Drawer"; // Slide-out drawer for side panel
 import DialogTitle from "@mui/material/DialogTitle"; // Dialog header
 import DialogContent from "@mui/material/DialogContent"; // Container for dialog body content
 import DialogActions from "@mui/material/DialogActions"; // Footer section for dialog actions
@@ -68,7 +68,7 @@ export default function InteractiveReporterApp() {
           const result = response.results.find((r) => r.graphic?.attributes); // Match any feature with attributes
           if (result) {
             setSelectedFeature(result.graphic); // Save clicked feature
-            setOpen(true); // Open form dialog
+            setOpen(true); // Open form drawer
           }
         });
       });
@@ -123,7 +123,7 @@ export default function InteractiveReporterApp() {
       console.error("Error submitting feature:", error);
     }
 
-    // Reset form and close dialog
+    // Reset form and close drawer
     setOpen(false);
     setName("");
     setComment("");
@@ -152,79 +152,74 @@ export default function InteractiveReporterApp() {
           </CardContent>
         </Card>
 
-        {/* Feedback Form Modal */}
-        <Dialog open={open} onClose={() => setOpen(false)}>
-          <DialogTitle>Feature Feedback</DialogTitle>
-          <DialogContent>
-            {/* Name field */}
-            <TextField
-              label="Your Name"
-              fullWidth
-              margin="dense"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
-            {/*City field*/}
-            <TextField
-              label="Your City/Organization"
-              fullWidth
-              margin="dense"
-              value={name} // Optional: Create a new state variable if separate
-              onChange={(e) => setName(e.target.value)}
-            />
-            {/* Comment field */}
-            <TextField
-              label="Your Comment"
-              fullWidth
-              margin="dense"
-              multiline
-              rows={4}
-              value={comment}
-              onChange={(e) => setComment(e.target.value)}
-            />
-            {/* Support checkbox */}
-            <FormControlLabel
-              control={<Checkbox checked={likesProject} onChange={(e) => setLikesProject(e.target.checked)} />}
-              label="This center is correctly classified"
-            />
-            {/* Concerns checkboxes */}
-            <FormGroup>
-              <Typography variant="subtitle1">Concerns</Typography>
-              <FormControlLabel
-                control={<Checkbox checked={projectConcern.noise} onChange={(e) => setProjectConcern(prev => ({ ...prev, noise: e.target.checked }))} />}
-                label="Noise"
+        {/* Slide-in Feedback Form */}
+        <Drawer anchor="right" open={open} onClose={() => setOpen(false)}>
+          <Box sx={{ width: 360, p: 2 }} role="presentation">
+            <DialogTitle>Feature Feedback</DialogTitle>
+            <DialogContent>
+              <TextField
+                label="Your Name"
+                fullWidth
+                margin="dense"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
+              <TextField
+                label="Your City/Organization"
+                fullWidth
+                margin="dense"
+                value={name} // Optional: Create a new state variable if separate
+                onChange={(e) => setName(e.target.value)}
+              />
+              <TextField
+                label="Your Comment"
+                fullWidth
+                margin="dense"
+                multiline
+                rows={4}
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
               />
               <FormControlLabel
-                control={<Checkbox checked={projectConcern.traffic} onChange={(e) => setProjectConcern(prev => ({ ...prev, traffic: e.target.checked }))} />}
-                label="Traffic"
+                control={<Checkbox checked={likesProject} onChange={(e) => setLikesProject(e.target.checked)} />}
+                label="This center is correctly classified"
               />
-              <FormControlLabel
-                control={<Checkbox checked={projectConcern.environment} onChange={(e) => setProjectConcern(prev => ({ ...prev, environment: e.target.checked }))} />}
-                label="Environmental Impact"
-              />
-            </FormGroup>
-            {/* Dropdown: priority selection */}
-            <FormControl fullWidth margin="dense">
-              <InputLabel>Project Priority</InputLabel>
-              <Select
-                value={priorityLevel}
-                onChange={(e) => setPriorityLevel(e.target.value)}
-                label="Project Priority"
-              >
-                <MenuItem value="High">High</MenuItem>
-                <MenuItem value="Medium">Medium</MenuItem>
-                <MenuItem value="Low">Low</MenuItem>
-              </Select>
-            </FormControl>
-          </DialogContent>
-          <DialogActions>
-            {/* Cancel button to close dialog without submitting */}
-            <Button onClick={() => setOpen(false)}>Cancel</Button>
-            <Button onClick={handleSubmit} variant="contained" color="primary">
-              Submit Feedback
-            </Button>
-          </DialogActions>
-        </Dialog>
+              <FormGroup>
+                <Typography variant="subtitle1">Concerns</Typography>
+                <FormControlLabel
+                  control={<Checkbox checked={projectConcern.noise} onChange={(e) => setProjectConcern(prev => ({ ...prev, noise: e.target.checked }))} />}
+                  label="Noise"
+                />
+                <FormControlLabel
+                  control={<Checkbox checked={projectConcern.traffic} onChange={(e) => setProjectConcern(prev => ({ ...prev, traffic: e.target.checked }))} />}
+                  label="Traffic"
+                />
+                <FormControlLabel
+                  control={<Checkbox checked={projectConcern.environment} onChange={(e) => setProjectConcern(prev => ({ ...prev, environment: e.target.checked }))} />}
+                  label="Environmental Impact"
+                />
+              </FormGroup>
+              <FormControl fullWidth margin="dense">
+                <InputLabel>Project Priority</InputLabel>
+                <Select
+                  value={priorityLevel}
+                  onChange={(e) => setPriorityLevel(e.target.value)}
+                  label="Project Priority"
+                >
+                  <MenuItem value="High">High</MenuItem>
+                  <MenuItem value="Medium">Medium</MenuItem>
+                  <MenuItem value="Low">Low</MenuItem>
+                </Select>
+              </FormControl>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={() => setOpen(false)}>Cancel</Button>
+              <Button onClick={handleSubmit} variant="contained" color="primary">
+                Submit Feedback
+              </Button>
+            </DialogActions>
+          </Box>
+        </Drawer>
 
         {/* Footer message */}
         <Typography variant="caption" display="block" gutterBottom>
