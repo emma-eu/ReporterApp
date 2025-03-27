@@ -116,7 +116,7 @@ export default function InteractiveReporterApp() {
     ]);
 
     const responseLayer = new FeatureLayer.default({
-      url: "https://services.arcgis.com/YOUR_ORG_ID/arcgis/rest/services/Responses/FeatureServer/0",
+      url: "https://services.arcgis.com/envisionutah/arcgis/rest/services/UserSubmittedCenters/FeatureServer/0",
     });
 
     const geometry = selectedFeature?.geometry || drawnGeometry;
@@ -125,14 +125,8 @@ export default function InteractiveReporterApp() {
     const newFeature = {
       geometry,
       attributes: {
-        name,
-        organization,
-        comment,
-        is_center: isCenter ? 1 : 0,
-        correct_type: likesProject ? 1 : 0,
-        updated_type: priorityLevel,
-        related_feature_id: selectedFeature?.attributes?.OBJECTID || null,
-        submitted_at: new Date().toISOString(),
+        feature_origin: drawnGeometry ? 1 : 0,
+        submittedcomment: comment, new Date().toISOString(),
       },
     };
 
