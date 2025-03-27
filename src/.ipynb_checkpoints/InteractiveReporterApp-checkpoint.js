@@ -67,9 +67,7 @@ export default function InteractiveReporterApp() {
         view.map.add(graphicsLayer);
 
         // Apply full transparency to features with feature_origin === 0
-        const [FeatureLayer] = await Promise.all([
-          import("@arcgis/core/layers/FeatureLayer")
-        ]);
+        // Removed unused import of FeatureLayer
 
         // const transparentLayer = new FeatureLayer.default(...) — removed unused variable
 
