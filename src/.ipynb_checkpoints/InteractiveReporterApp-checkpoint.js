@@ -71,21 +71,7 @@ export default function InteractiveReporterApp() {
           import("@arcgis/core/layers/FeatureLayer")
         ]);
 
-        const transparentLayer = new FeatureLayer.default({
-          url: "https://services6.arcgis.com/MLUVmF7LMfvzoHjV/arcgis/rest/services/CenterResponses/FeatureServer/0",
-          definitionExpression: "feature_origin = 0",
-          renderer: {
-            type: "simple",
-            symbol: {
-              type: "simple-fill",
-              color: [0, 0, 0, 0], // fully transparent
-              outline: {
-                color: [0, 0, 0, 0],
-                width: 0
-              }
-            }
-          }
-        });
+        // const transparentLayer = new FeatureLayer.default(...) — removed unused variable
 
         // Removed transparent layer for existing features — they will no longer be displayed
         // view.map.add(transparentLayer);
