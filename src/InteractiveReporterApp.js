@@ -60,6 +60,9 @@ export default function InteractiveReporterApp() {
       setView(view);
 
       view.when(async () => {
+        const graphicsLayer = new GraphicsLayer.default();
+        view.map.add(graphicsLayer);
+
         const legend = new Legend({
           view,
           layerInfos: [
@@ -68,7 +71,6 @@ export default function InteractiveReporterApp() {
               legendOptions: {
                 title: "Digitized by Reviewers"
               },
-              // Only show one symbol
               featureLayer: {
                 renderer: {
                   type: "simple",
