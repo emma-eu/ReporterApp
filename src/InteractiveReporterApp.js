@@ -1,121 +1,162 @@
-import { useEffect, useRef, useState } from "react"; // React hooks for managing component lifecycle, references, and state
-import Card from "@mui/material/Card"; // Card UI wrapper from Material UI
-import CardContent from "@mui/material/CardContent"; // Content container for Card
-import Button from "@mui/material/Button"; // Material UI button
-import Typography from "@mui/material/Typography"; // Typography for headers and text
-import Box from "@mui/material/Box"; // Layout component for flexible styling
-import Drawer from "@mui/material/Drawer"; // Slide-out drawer for side panel
-import DialogTitle from "@mui/material/DialogTitle"; // Dialog header
-import DialogContent from "@mui/material/DialogContent"; // Container for dialog body content
-import DialogActions from "@mui/material/DialogActions"; // Footer section for dialog actions
-import TextField from "@mui/material/TextField"; // Input field for text
-import Checkbox from "@mui/material/Checkbox"; // Checkbox input
-import FormControlLabel from "@mui/material/FormControlLabel"; // Wraps checkbox with a label
-import FormGroup from "@mui/material/FormGroup"; // Groups related form controls (e.g., checkboxes)
-import FormControl from "@mui/material/FormControl"; // Wrapper for select inputs
-import InputLabel from "@mui/material/InputLabel"; // Label for select dropdown
-import Select from "@mui/material/Select"; // Dropdown menu
-import MenuItem from "@mui/material/MenuItem"; // Items within Select dropdown
-import Legend from "@arcgis/core/widgets/Legend"; // ArcGIS JS API Legend widget
+import { useEffect, useRef, useState } from "react";
+// Material UI components for layout and UI
+import Card from "@mui/material/Card";
+import CardContent from "@mui/material/CardContent";
+import Button from "@mui/material/Button";
+import Typography from "@mui/material/Typography";
+import Box from "@mui/material/Box";
+import Drawer from "@mui/material/Drawer";
+import DialogTitle from "@mui/material/DialogTitle";
+import DialogContent from "@mui/material/DialogContent";
+import DialogActions from "@mui/material/DialogActions";
+import TextField from "@mui/material/TextField";
+import Checkbox from "@mui/material/Checkbox";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import FormGroup from "@mui/material/FormGroup";
+import FormControl from "@mui/material/FormControl";
+import InputLabel from "@mui/material/InputLabel";
+import Select from "@mui/material/Select";
+import MenuItem from "@mui/material/MenuItem";
+import Legend from "@arcgis/core/widgets/Legend"; // ArcGIS Legend widget
 
 export default function InteractiveReporterApp() {
-  const mapRef = useRef(null); // Ref to hold the DOM container for the map
-  const legendRef = useRef(null); // Ref to hold the DOM container for the legend
-  const [, setView] = useState(null); // View is stored in case needed later
+  // References to the DOM elements for map and legend
+  const mapRef = useRef(null);
+  const legendRef = useRef(null);
+  const [, setView] = useState(null); // State to optionally hold view instance
 
-  // React state hooks for form control and popup behavior
-  const [open, setOpen] = useState(false); // Controls visibility of feedback form
-  const [selectedFeature, setSelectedFeature] = useState(null); // Stores clicked map feature
-  const [name, setName] = useState(""); // Stores user input name
-  const [organization, setOrganization] = useState("");
-  const [comment, setComment] = useState(""); // Stores user comment
-  const [isCenter, setisCenter] = useState(false);//Checkbox: this feature is truly a center
-  const [likesProject, setLikesProject] = useState(false); // Checkbox: this center is classified correctly
-  //const [projectConcern, setProjectConcern] = useState({ Metropolitan: false, Urban: false, City: false, Neighborhood: false }); // Checkboxes: concerns
-  const [priorityLevel, setPriorityLevel] = useState(""); // Dropdown: priority level
+  // State variables for form and feature interaction
+  const [open, setOpen] = useState(false); // Controls visibility of form drawer
+  const [selectedFeature, setSelectedFeature] = useState(null); // Stores clicked feature
+  const [drawnGeometry, setDrawnGeometry] = useState(null); // Stores user-drawn geometry
+  const [drawMode, setDrawMode] = useState(false); // Whether sketch mode is active
+  const [name, setName] = useState(""); // User name
+  const [organization, setOrganization] = useState(""); // User's organization or city
+  const [comment, setComment] = useState(""); // User's comment
+  const [isCenter, setisCenter] = useState(false); // Checkbox: is a center
+  const [likesProject, setLikesProject] = useState(false); // Checkbox: correctly classified
+  const [priorityLevel, setPriorityLevel] = useState(""); // Dropdown: correct type
 
   useEffect(() => {
-    // Load and initialize the ArcGIS map and set up click interaction
+    // Loads map and adds ArcGIS widgets and handlers
     const loadMap = async () => {
-      const [MapView, WebMap] = await Promise.all([
+      // Import ArcGIS modules
+      const [MapView, WebMap, Sketch, GraphicsLayer] = await Promise.all([
         import("@arcgis/core/views/MapView"),
         import("@arcgis/core/WebMap"),
+        import("@arcgis/core/widgets/Sketch"),
+        import("@arcgis/core/layers/GraphicsLayer"),
       ]);
 
+      // Load web map from portal item
       const webmap = new WebMap.default({
-        portalItem: {
-          id: "193de866247a4946a17331d2fdefc294" // Replace with your ArcGIS Online web map ID
-        },
+        portalItem: { id: "193de866247a4946a17331d2fdefc294" },
       });
 
+      // Create and configure the map view
       const view = new MapView.default({
-        container: mapRef.current, // Mount the map to this DOM node
+        container: mapRef.current,
         map: webmap,
-        center: [-111.787301, 40.221715], // Map center
+        center: [-111.787301, 40.221715], // Center on Utah County
         zoom: 10,
       });
 
-      setView(view); // Save view instance to state if needed
+      setView(view);
 
       view.when(() => {
-        // Add a legend widget to the map
+        // Add the legend widget
         const legend = new Legend({ view });
-        if (legendRef.current) {
-          legend.container = legendRef.current;
-        }
+        if (legendRef.current) legend.container = legendRef.current;
 
-        // Click handler: check if user clicked any feature (not limited to layer title)
-        view.on("click", async (event) => {
-          const response = await view.hitTest(event); // Check what was clicked
-          const result = response.results.find((r) => r.graphic?.attributes); // Match any feature with attributes
-          if (result) {
-            setSelectedFeature(result.graphic); // Save clicked feature
+        // Add a graphics layer for sketching
+        const graphicsLayer = new GraphicsLayer.default();
+        view.map.add(graphicsLayer);
+
+        // Create the Sketch widget for drawing polygons
+        const sketch = new Sketch.default({
+          layer: graphicsLayer,
+          view,
+          creationMode: "single",
+          visibleElements: {
+            createTools: { point: false, polyline: false, rectangle: false, circle: false },
+            selectionTools: { "rectangle-selection": false },
+            undoRedoMenu: false
+          },
+          visible: false // Initially hidden
+        });
+
+        view.ui.add(sketch, "top-right"); // Add sketch to map UI
+
+        // Handle completion of user drawing
+        sketch.on("create", (event) => {
+          if (event.state === "complete") {
+            setDrawnGeometry(event.graphic.geometry); // Store drawn polygon
+            setSelectedFeature(null); // Clear selected feature
+            setDrawMode(false); // Exit draw mode
+            sketch.visible = false; // Hide sketch tools
             setOpen(true); // Open form drawer
           }
         });
+
+        // Handle clicks on existing map features
+        view.on("click", async (event) => {
+          const response = await view.hitTest(event);
+          const result = response.results.find((r) => r.graphic?.attributes);
+          if (result) {
+            setSelectedFeature(result.graphic);
+            setDrawnGeometry(null); // Clear any drawn feature
+            setOpen(true);
+          }
+        });
+
+        // Keep sketch visibility in sync with drawMode state
+        const interval = setInterval(() => {
+          sketch.visible = drawMode;
+        }, 200);
+
+        return () => clearInterval(interval); // Cleanup
       });
     };
 
-    loadMap(); // Call map loader when component mounts
-  }, []);
+    loadMap();
+  }, [drawMode]);
 
-  // Handles submitting feedback and writing it to the hosted feature layer
+  // Submit form data to hosted feature layer
   const handleSubmit = async () => {
-    if (!selectedFeature) return; // Don't proceed without a selected feature
-
     const [FeatureLayer] = await Promise.all([
       import("@arcgis/core/layers/FeatureLayer"),
     ]);
 
-    // Reference to the "Responses" hosted feature layer
     const responseLayer = new FeatureLayer.default({
-      url: "https://services.arcgis.com/YOUR_ORG_ID/arcgis/rest/services/Responses/FeatureServer/0",
+      url: "https://services.arcgis.com/envisionutah/arcgis/rest/services/Responses/FeatureServer/0", // Replace with your layer URL and CREATE this layer
     });
 
-    // Construct a new feature with form values and geometry
+    const geometry = selectedFeature?.geometry || drawnGeometry;
+    if (!geometry) return; // Must have a geometry
+
+    // Construct feature attributes
     const newFeature = {
-      geometry: selectedFeature.geometry,
+      geometry,
       attributes: {
         name,
         organization,
-        comment, 
+        comment,
         is_center: isCenter ? 1 : 0,
         correct_type: likesProject ? 1 : 0,
         updated_type: priorityLevel,
-        related_feature_id: selectedFeature.attributes.OBJECTID, // Link response to selected feature
+        related_feature_id: selectedFeature?.attributes?.OBJECTID || null,
         submitted_at: new Date().toISOString(),
       },
     };
 
-    // Submit the feature to ArcGIS via applyEdits
     try {
       const result = await responseLayer.applyEdits({
         addFeatures: [newFeature],
       });
 
-      // Check for success or show error
+      // Confirm success
       if (result.addFeatureResults.length > 0 && !result.addFeatureResults[0].error) {
-        alert("Feedback submitted successfully!");
+        alert("Feature submitted successfully!");
       } else {
         alert("Submission failed.");
         console.error(result);
@@ -124,92 +165,64 @@ export default function InteractiveReporterApp() {
       console.error("Error submitting feature:", error);
     }
 
-    // Reset form and close drawer
+    // Reset form
     setOpen(false);
     setName("");
     setComment("");
     setLikesProject(false);
-    //setProjectConcern({ noise: false, traffic: false, environment: false });
     setPriorityLevel("");
     setSelectedFeature(null);
+    setDrawnGeometry(null);
   };
 
   return (
     <Box display="flex" flexDirection="column" alignItems="center" p={4}>
-      <Box width="100%" maxWidth="1500px">{/*1000*/}
+      <Box width="100%" maxWidth="1500px">
         {/* Title and instructions */}
         <Typography variant="h4" gutterBottom>
           MAG First Draft Centers Map Feedback
         </Typography>
         <Typography variant="body1" gutterBottom>
-          Click a feature on the map to leave feedback directly tied to that location.
+          Click a feature on the map or draw a new one to leave feedback.
         </Typography>
 
-        {/* Map and legend container */}
+        {/* Buttons for drawing or commenting */}
+        <Box display="flex" gap={2} mb={2}>
+          <Button variant="contained" onClick={() => setDrawMode(true)}>
+            Add A Feature
+          </Button>
+          <Button variant="outlined" onClick={() => alert("Click a feature on the map to comment.")}>
+            Click to Add A Comment
+          </Button>
+        </Box>
+
+        {/* Map and Legend */}
         <Card sx={{ my: 2 }}>
-          <CardContent sx={{ height: 750, display: 'flex' }}>{/*600*/}
+          <CardContent sx={{ height: 750, display: 'flex' }}>
             <div ref={mapRef} style={{ width: "80%", height: "100%", borderRadius: 8 }} />
-            <div
-              ref={legendRef}
-              style={{
-                width: "20%", // give it more room
-                minWidth: 200, // ensures symbols and text aren’t cramped
-                paddingLeft: 10,
-                overflowY: "auto" // optional: allow scroll if needed
-              }}
-            />
+            <div ref={legendRef} style={{ width: "20%", minWidth: 200, paddingLeft: 10, overflowY: "auto" }} />
           </CardContent>
         </Card>
 
-        {/* Slide-in Feedback Form */}
+        {/* Drawer form for submitting feedback */}
         <Drawer anchor="right" open={open} onClose={() => setOpen(false)}>
           <Box sx={{ width: 360, p: 2 }} role="presentation">
             <DialogTitle>Feature Feedback</DialogTitle>
             <DialogContent>
-              <TextField
-                label="Your Name"
-                fullWidth
-                margin="dense"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-              />
-              <TextField
-                label="Your City/Organization"
-                fullWidth
-                margin="dense"
-                value={organization} // Optional: Create a new state variable if separate
-                onChange={(e) => setOrganization(e.target.value)}
-              />
-              <TextField
-                label="Add Your Comment Here"
-                fullWidth
-                margin="dense"
-                multiline
-                rows={4}
-                value={comment}
-                onChange={(e) => setComment(e.target.value)}
-              />
+              <TextField label="Your Name" fullWidth margin="dense" value={name} onChange={(e) => setName(e.target.value)} />
+              <TextField label="Your City/Organization" fullWidth margin="dense" value={organization} onChange={(e) => setOrganization(e.target.value)} />
+              <TextField label="Add Your Comment Here" fullWidth margin="dense" multiline rows={4} value={comment} onChange={(e) => setComment(e.target.value)} />
               <Typography variant="body1" color="textSecondary" sx={{ mb: 2 }}>
-              A center is defined as a walkable area where activity is focused, with places to live, work, and play. The characteristics of centers enable more people in a community to choose transportation options like walking, bicycling, and public transportation. 
+                A center is defined as a walkable area where activity is focused, with places to live, work, and play...
               </Typography>
-              <FormControlLabel
-                control={<Checkbox checked={isCenter} onChange={(e) => setisCenter(e.target.checked)} />}
-                label="This feature meets the characteristics of a center as defined above."
-              />
-              <FormControlLabel
-                control={<Checkbox checked={likesProject} onChange={(e) => setLikesProject(e.target.checked)} />}
-                label="This center is correctly classified"
-              />
+              <FormControlLabel control={<Checkbox checked={isCenter} onChange={(e) => setisCenter(e.target.checked)} />} label="This feature meets the characteristics of a center." />
+              <FormControlLabel control={<Checkbox checked={likesProject} onChange={(e) => setLikesProject(e.target.checked)} />} label="This center is correctly classified." />
               <FormGroup>
-                <Typography variant="subtitle1">If the center is incorrectly classified, please select the correct classification from the options below</Typography>
+                <Typography variant="subtitle1">If the center is incorrectly classified, select the correct classification:</Typography>
               </FormGroup>
               <FormControl fullWidth margin="dense">
                 <InputLabel id="center-label">Center Classification</InputLabel>
-                <Select
-                  labelId="center-label"
-                  value={priorityLevel}
-                  onChange={(e) => setPriorityLevel(e.target.value)}
-                >
+                <Select labelId="center-label" value={priorityLevel} onChange={(e) => setPriorityLevel(e.target.value)}>
                   <MenuItem value="Metropolitan">Metropolitan</MenuItem>
                   <MenuItem value="Urban">Urban</MenuItem>
                   <MenuItem value="City">City</MenuItem>
@@ -220,14 +233,12 @@ export default function InteractiveReporterApp() {
             </DialogContent>
             <DialogActions>
               <Button onClick={() => setOpen(false)}>Cancel</Button>
-              <Button onClick={handleSubmit} variant="contained" color="primary">
-                Submit Feedback
-              </Button>
+              <Button onClick={handleSubmit} variant="contained" color="primary">Submit Feedback</Button>
             </DialogActions>
           </Box>
         </Drawer>
 
-        {/* Footer message */}
+        {/* Footer note */}
         <Typography variant="caption" display="block" gutterBottom>
           Feedback is saved directly to the hosted feature layer "Responses".
         </Typography>
