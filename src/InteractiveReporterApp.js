@@ -60,37 +60,11 @@ export default function InteractiveReporterApp() {
       setView(view);
 
       view.when(async () => {
-        // Removed duplicate declaration of graphicsLayer
+        // graphicsLayer was already declared earlier; removing duplicate declaration and add
 
-// Removed duplicate declaration of graphicsLayer
 
-        if (legendRef.current) {
-          const legend = new Legend({
-            view,
-            layerInfos: [
-              {
-                layer: graphicsLayer,
-                legendOptions: {
-                  title: "Digitized by Reviewers"
-                },
-                featureLayer: {
-                  renderer: {
-                    type: "simple",
-                    symbol: {
-                      type: "simple-fill",
-                      color: [0, 255, 255, 0.3],
-                      outline: {
-                        color: [0, 180, 180, 1],
-                        width: 2
-                      }
-                    }
-                  }
-                }
-              }
-            ]
-          });
-          legend.container = legendRef.current;
-        }
+        
+        if (legendRef.current) legend.container = legendRef.current;
 
         const graphicsLayer = new GraphicsLayer.default();
         view.map.add(graphicsLayer);
@@ -115,7 +89,7 @@ export default function InteractiveReporterApp() {
           // Symbol for new polygons: bright blue-green with solid outline
           polygonSymbol: {
             type: "simple-fill",
-            color: [0, 255, 255, 0.3],
+            color: [0, 255, 255, 0.3], // bright blue-green with transparency
             outline: {
               color: [0, 180, 180, 1],
               width: 2
