@@ -126,8 +126,14 @@ export default function InteractiveReporterApp() {
       geometry,
       attributes: {
         feature_origin: drawnGeometry ? 1 : 0,
+        name,
+        organization,
         submittedcomment: comment,
+        is_center: isCenter ? 1 : 0,
+        correct_type: likesProject ? 1 : 0,
+        updated_type: priorityLevel,
         submitted_at: new Date().toISOString(),
+        related_feature_id: selectedFeature?.attributes?.OBJECTID || null
       },
     };
 
