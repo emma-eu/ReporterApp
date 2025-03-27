@@ -60,21 +60,52 @@ export default function InteractiveReporterApp() {
       setView(view);
 
       view.when(async () => {
-        // graphicsLayer was already declared earlier; removing duplicate declaration and add
+        // Removed duplicate declaration of graphicsLayer
 
+// Removed duplicate declaration of graphicsLayer
 
-        
-        if (legendRef.current) legend.container = legendRef.current;
+        if (legendRef.current) {
+          const legend = new Legend({
+            view,
+            layerInfos: [
+              {
+                layer: graphicsLayer,
+                legendOptions: {
+                  title: "Digitized by Reviewers"
+                },
+                featureLayer: {
+                  renderer: {
+                    type: "simple",
+                    symbol: {
+                      type: "simple-fill",
+                      color: [0, 255, 255, 0.3],
+                      outline: {
+                        color: [0, 180, 180, 1],
+                        width: 2
+                      }
+                    }
+                  }
+                }
+              }
+            ]
+          });
+          legend.container = legendRef.current;
+        }
 
         const graphicsLayer = new GraphicsLayer.default();
         view.map.add(graphicsLayer);
 
         // Apply full transparency to features with feature_origin === 0
-        // Removed unused import of FeatureLayer
+        const [FeatureLayer] = await Promise.all([
+          import("@arcgis/core/layers/FeatureLayer")
+        ]);
 
-        // const transparentLayer = new FeatureLayer.default(...) — removed unused variable
+        const existingCentersLayer = new FeatureLayer.default({
+          url: "https://services6.arcgis.com/MLUVmF7LMfvzoHjV/arcgis/rest/services/CenterResponses/FeatureServer/0",
+          definitionExpression: "feature_origin = 0"
+        });
 
-        // Removed transparent layer for existing features — they will no longer be displayed
+        view.map.add(existingCentersLayer);
         // view.map.add(transparentLayer);
 
         const sketch = new Sketch.default({
@@ -89,7 +120,7 @@ export default function InteractiveReporterApp() {
           // Symbol for new polygons: bright blue-green with solid outline
           polygonSymbol: {
             type: "simple-fill",
-            color: [0, 255, 255, 0.3], // bright blue-green with transparency
+            color: [0, 255, 255, 0.3],
             outline: {
               color: [0, 180, 180, 1],
               width: 2
