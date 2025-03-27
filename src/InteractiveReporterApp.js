@@ -74,6 +74,15 @@ export default function InteractiveReporterApp() {
             createTools: { point: false, polyline: false, rectangle: false, circle: false },
             selectionTools: { "rectangle-selection": false },
             undoRedoMenu: false
+          },
+          // Symbol for new polygons: bright blue-green with solid outline
+          polygonSymbol: {
+            type: "simple-fill",
+            color: [0, 255, 255, 0.3], // bright blue-green with transparency
+            outline: {
+              color: [0, 180, 180, 1],
+              width: 2
+            }
           }
         });
 
@@ -169,10 +178,10 @@ export default function InteractiveReporterApp() {
         </Typography>
 
         <Box display="flex" gap={2} mb={2}>
-          <Button variant="contained" onClick={startDrawing}> {/* Fixed button to call startDrawing */}
+          <Button variant="contained" color="primary" onClick={startDrawing}>
             Add A Feature
           </Button>
-          <Button variant="outlined" onClick={() => alert("Click a feature on the map to comment.")}>
+          <Button variant="contained" color="primary" onClick={() => alert("Click a feature on the map to comment.")}>
             Click to Add A Comment
           </Button>
         </Box>
@@ -191,24 +200,40 @@ export default function InteractiveReporterApp() {
               <TextField label="Your Name" fullWidth margin="dense" value={name} onChange={(e) => setName(e.target.value)} />
               <TextField label="Your City/Organization" fullWidth margin="dense" value={organization} onChange={(e) => setOrganization(e.target.value)} />
               <TextField label="Add Your Comment Here" fullWidth margin="dense" multiline rows={4} value={comment} onChange={(e) => setComment(e.target.value)} />
-              <Typography variant="body1" color="textSecondary" sx={{ mb: 2 }}>
-                A center is defined as a walkable area where activity is focused, with places to live, work, and play...
-              </Typography>
-              <FormControlLabel control={<Checkbox checked={isCenter} onChange={(e) => setisCenter(e.target.checked)} />} label="This feature meets the characteristics of a center." />
-              <FormControlLabel control={<Checkbox checked={likesProject} onChange={(e) => setLikesProject(e.target.checked)} />} label="This center is correctly classified." />
-              <FormGroup>
-                <Typography variant="subtitle1">If the center is incorrectly classified, select the correct classification:</Typography>
-              </FormGroup>
-              <FormControl fullWidth margin="dense">
-                <InputLabel id="center-label">Center Classification</InputLabel>
-                <Select labelId="center-label" value={priorityLevel} onChange={(e) => setPriorityLevel(e.target.value)}>
-                  <MenuItem value="Metropolitan">Metropolitan</MenuItem>
-                  <MenuItem value="Urban">Urban</MenuItem>
-                  <MenuItem value="City">City</MenuItem>
-                  <MenuItem value="Neighborhood">Neighborhood</MenuItem>
-                  <MenuItem value="NOT A CENTER">This is not a center</MenuItem>
-                </Select>
-              </FormControl>
+              {drawnGeometry ? (
+                // Show simplified form for newly drawn features
+                <FormControl fullWidth margin="dense">
+                  <InputLabel id="center-label">Center Classification</InputLabel>
+                  <Select labelId="center-label" value={priorityLevel} onChange={(e) => setPriorityLevel(e.target.value)}>
+                    <MenuItem value="Metropolitan">Metropolitan</MenuItem>
+                    <MenuItem value="Urban">Urban</MenuItem>
+                    <MenuItem value="City">City</MenuItem>
+                    <MenuItem value="Neighborhood">Neighborhood</MenuItem>
+                  </Select>
+                </FormControl>
+              ) : (
+                // Full form for clicked features
+                <>
+                  <Typography variant="body1" color="textSecondary" sx={{ mb: 2 }}>
+                    A center is defined as a walkable area where activity is focused, with places to live, work, and play...
+                  </Typography>
+                  <FormControlLabel control={<Checkbox checked={isCenter} onChange={(e) => setisCenter(e.target.checked)} />} label="This feature meets the characteristics of a center." />
+                  <FormControlLabel control={<Checkbox checked={likesProject} onChange={(e) => setLikesProject(e.target.checked)} />} label="This center is correctly classified." />
+                  <FormGroup>
+                    <Typography variant="subtitle1">If the center is incorrectly classified, select the correct classification:</Typography>
+                  </FormGroup>
+                  <FormControl fullWidth margin="dense">
+                    <InputLabel id="center-label">Center Classification</InputLabel>
+                    <Select labelId="center-label" value={priorityLevel} onChange={(e) => setPriorityLevel(e.target.value)}>
+                      <MenuItem value="Metropolitan">Metropolitan</MenuItem>
+                      <MenuItem value="Urban">Urban</MenuItem>
+                      <MenuItem value="City">City</MenuItem>
+                      <MenuItem value="Neighborhood">Neighborhood</MenuItem>
+                      <MenuItem value="NOT A CENTER">This is not a center</MenuItem>
+                    </Select>
+                  </FormControl>
+                </>
+              )}
             </DialogContent>
             <DialogActions>
               <Button onClick={() => setOpen(false)}>Cancel</Button>
