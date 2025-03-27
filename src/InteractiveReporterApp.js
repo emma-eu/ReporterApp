@@ -62,7 +62,9 @@ export default function InteractiveReporterApp() {
       view.when(async () => {
         // Removed duplicate declaration of graphicsLayer
 
-$1if (legendRef.current) {
+// Removed duplicate declaration of graphicsLayer
+
+        if (legendRef.current) {
           const legend = new Legend({
             view,
             layerInfos: [
@@ -101,7 +103,25 @@ $1if (legendRef.current) {
         // Removed transparent layer for existing features — they will no longer be displayed
         // view.map.add(transparentLayer);
 
-        $1;
+        const sketch = new Sketch.default({
+          layer: graphicsLayer,
+          view,
+          creationMode: "single",
+          visibleElements: {
+            createTools: { point: false, polyline: false, rectangle: false, circle: false },
+            selectionTools: { "rectangle-selection": false },
+            undoRedoMenu: false
+          },
+          // Symbol for new polygons: bright blue-green with solid outline
+          polygonSymbol: {
+            type: "simple-fill",
+            color: [0, 255, 255, 0.3],
+            outline: {
+              color: [0, 180, 180, 1],
+              width: 2
+            }
+          }
+        });
 
         sketchRef.current = sketch; // store sketch in ref
         view.ui.add(sketch, "top-right");
