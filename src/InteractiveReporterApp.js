@@ -87,7 +87,8 @@ export default function InteractiveReporterApp() {
           }
         });
 
-        view.map.add(transparentLayer);
+        // Removed transparent layer for existing features — they will no longer be displayed
+        // view.map.add(transparentLayer);
 
         const sketch = new Sketch.default({
           layer: graphicsLayer,
