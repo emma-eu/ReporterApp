@@ -116,7 +116,7 @@ export default function InteractiveReporterApp() {
     ]);
 
     const responseLayer = new FeatureLayer.default({
-      url: "https://services.arcgis.com/envisionutah/arcgis/rest/services/UserSubmittedCenters/FeatureServer/0",
+      url: "https://services6.arcgis.com/MLUVmF7LMfvzoHjV/arcgis/rest/services/CenterResponses/FeatureServer/0",
     });
 
     const geometry = selectedFeature?.geometry || drawnGeometry;
