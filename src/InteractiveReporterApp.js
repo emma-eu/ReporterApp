@@ -126,7 +126,8 @@ export default function InteractiveReporterApp() {
       geometry,
       attributes: {
         feature_origin: drawnGeometry ? 1 : 0,
-        submittedcomment: comment, new Date().toISOString(),
+        submittedcomment: comment,
+        submitted_at: new Date().toISOString(),
       },
     };
 
