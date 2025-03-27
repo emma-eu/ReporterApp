@@ -54,7 +54,7 @@ export default function InteractiveReporterApp() {
         container: mapRef.current,
         map: webmap,
         center: [-111.787301, 40.221715],
-        zoom: 10,
+        zoom: 10.5,
       });
 
       setView(view);
