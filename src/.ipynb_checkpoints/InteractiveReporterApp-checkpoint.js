@@ -90,6 +90,9 @@ export default function InteractiveReporterApp() {
         view.ui.add(sketch, "top-right");
 
         sketch.on("create", (event) => {
+          if (event.state === "start") {
+            alert("Sketch mode: Click to place vertices. Double-click to finish the shape.");
+          }
           if (event.state === "complete") {
             setDrawnGeometry(event.graphic.geometry);
             setSelectedFeature(null);
@@ -236,6 +239,16 @@ export default function InteractiveReporterApp() {
               )}
             </DialogContent>
             <DialogActions>
+              {drawnGeometry && sketchRef.current && (
+                <Button color="error" onClick={() => {
+                  const layer = sketchRef.current.layer;
+                  layer.removeAll();
+                  setDrawnGeometry(null);
+                  setOpen(false);
+                }}>
+                  Delete Feature
+                </Button>
+              )}
               <Button onClick={() => setOpen(false)}>Cancel</Button>
               <Button onClick={handleSubmit} variant="contained" color="primary">Submit Feedback</Button>
             </DialogActions>
