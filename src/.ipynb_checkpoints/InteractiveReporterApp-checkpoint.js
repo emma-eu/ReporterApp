@@ -60,16 +60,10 @@ export default function InteractiveReporterApp() {
       setView(view);
 
       view.when(async () => {
-        // Removed duplicate declaration of graphicsLayer
+        const graphicsLayer = new GraphicsLayer.default();
+        view.map.add(graphicsLayer);
 
-        // legend logic moved above after graphicsLayer is defined
-
-        
-        // graphicsLayer was already declared earlier; removing duplicate declaration and add
-
-
-        
-        if (legendRef.current) {
+$1if (legendRef.current) {
           const legend = new Legend({
             view,
             layerInfos: [
