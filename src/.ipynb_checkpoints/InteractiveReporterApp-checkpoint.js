@@ -59,12 +59,35 @@ export default function InteractiveReporterApp() {
 
       setView(view);
 
-      view.when(() => {
+      view.when(async () => {
         const legend = new Legend({ view });
         if (legendRef.current) legend.container = legendRef.current;
 
         const graphicsLayer = new GraphicsLayer.default();
         view.map.add(graphicsLayer);
+
+        // Apply full transparency to features with feature_origin === 0
+        const [FeatureLayer] = await Promise.all([
+          import("@arcgis/core/layers/FeatureLayer")
+        ]);
+
+        const transparentLayer = new FeatureLayer.default({
+          url: "https://services6.arcgis.com/MLUVmF7LMfvzoHjV/arcgis/rest/services/CenterResponses/FeatureServer/0",
+          definitionExpression: "feature_origin = 0",
+          renderer: {
+            type: "simple",
+            symbol: {
+              type: "simple-fill",
+              color: [0, 0, 0, 0], // fully transparent
+              outline: {
+                color: [0, 0, 0, 0],
+                width: 0
+              }
+            }
+          }
+        });
+
+        view.map.add(transparentLayer);
 
         const sketch = new Sketch.default({
           layer: graphicsLayer,
