@@ -60,7 +60,31 @@ export default function InteractiveReporterApp() {
       setView(view);
 
       view.when(async () => {
-        const legend = new Legend({ view });
+        const legend = new Legend({
+          view,
+          layerInfos: [
+            {
+              layer: graphicsLayer,
+              legendOptions: {
+                title: "Digitized by Reviewers"
+              },
+              // Only show one symbol
+              featureLayer: {
+                renderer: {
+                  type: "simple",
+                  symbol: {
+                    type: "simple-fill",
+                    color: [0, 255, 255, 0.3],
+                    outline: {
+                      color: [0, 180, 180, 1],
+                      width: 2
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        });
         if (legendRef.current) legend.container = legendRef.current;
 
         const graphicsLayer = new GraphicsLayer.default();
@@ -193,7 +217,7 @@ export default function InteractiveReporterApp() {
             Add A Feature
           </Button>
           <Button variant="contained" color="primary" onClick={() => alert("Click a feature on the map to comment.")}>
-            Click to Add A Comment
+            Add A Comment on an Existing Feature
           </Button>
         </Box>
 
