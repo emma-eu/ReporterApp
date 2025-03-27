@@ -1,3 +1,5 @@
+// NOTE: This update fixes the Sketch activation logic so the "Add A Feature" button allows users to start drawing a polygon immediately
+
 import { useEffect, useRef, useState } from "react";
 // Material UI components for layout and UI
 import Card from "@mui/material/Card";
@@ -20,27 +22,23 @@ import MenuItem from "@mui/material/MenuItem";
 import Legend from "@arcgis/core/widgets/Legend"; // ArcGIS Legend widget
 
 export default function InteractiveReporterApp() {
-  // References to the DOM elements for map and legend
   const mapRef = useRef(null);
   const legendRef = useRef(null);
-  const [, setView] = useState(null); // State to optionally hold view instance
+  const sketchRef = useRef(null); // <== New ref to store Sketch instance
+  const [, setView] = useState(null);
 
-  // State variables for form and feature interaction
-  const [open, setOpen] = useState(false); // Controls visibility of form drawer
-  const [selectedFeature, setSelectedFeature] = useState(null); // Stores clicked feature
-  const [drawnGeometry, setDrawnGeometry] = useState(null); // Stores user-drawn geometry
-  const [drawMode, setDrawMode] = useState(false); // Whether sketch mode is active
-  const [name, setName] = useState(""); // User name
-  const [organization, setOrganization] = useState(""); // User's organization or city
-  const [comment, setComment] = useState(""); // User's comment
-  const [isCenter, setisCenter] = useState(false); // Checkbox: is a center
-  const [likesProject, setLikesProject] = useState(false); // Checkbox: correctly classified
-  const [priorityLevel, setPriorityLevel] = useState(""); // Dropdown: correct type
+  const [open, setOpen] = useState(false);
+  const [selectedFeature, setSelectedFeature] = useState(null);
+  const [drawnGeometry, setDrawnGeometry] = useState(null);
+  const [name, setName] = useState("");
+  const [organization, setOrganization] = useState("");
+  const [comment, setComment] = useState("");
+  const [isCenter, setisCenter] = useState(false);
+  const [likesProject, setLikesProject] = useState(false);
+  const [priorityLevel, setPriorityLevel] = useState("");
 
   useEffect(() => {
-    // Loads map and adds ArcGIS widgets and handlers
     const loadMap = async () => {
-      // Import ArcGIS modules
       const [MapView, WebMap, Sketch, GraphicsLayer] = await Promise.all([
         import("@arcgis/core/views/MapView"),
         import("@arcgis/core/WebMap"),
@@ -48,31 +46,26 @@ export default function InteractiveReporterApp() {
         import("@arcgis/core/layers/GraphicsLayer"),
       ]);
 
-      // Load web map from portal item
       const webmap = new WebMap.default({
         portalItem: { id: "193de866247a4946a17331d2fdefc294" },
       });
 
-      // Create and configure the map view
       const view = new MapView.default({
         container: mapRef.current,
         map: webmap,
-        center: [-111.787301, 40.221715], // Center on Utah County
+        center: [-111.787301, 40.221715],
         zoom: 10,
       });
 
       setView(view);
 
       view.when(() => {
-        // Add the legend widget
         const legend = new Legend({ view });
         if (legendRef.current) legend.container = legendRef.current;
 
-        // Add a graphics layer for sketching
         const graphicsLayer = new GraphicsLayer.default();
         view.map.add(graphicsLayer);
 
-        // Create the Sketch widget for drawing polygons
         const sketch = new Sketch.default({
           layer: graphicsLayer,
           view,
@@ -81,60 +74,54 @@ export default function InteractiveReporterApp() {
             createTools: { point: false, polyline: false, rectangle: false, circle: false },
             selectionTools: { "rectangle-selection": false },
             undoRedoMenu: false
-          },
-          visible: false // Initially hidden
-        });
-
-        view.ui.add(sketch, "top-right"); // Add sketch to map UI
-
-        // Handle completion of user drawing
-        sketch.on("create", (event) => {
-          if (event.state === "complete") {
-            setDrawnGeometry(event.graphic.geometry); // Store drawn polygon
-            setSelectedFeature(null); // Clear selected feature
-            setDrawMode(false); // Exit draw mode
-            sketch.visible = false; // Hide sketch tools
-            setOpen(true); // Open form drawer
           }
         });
 
-        // Handle clicks on existing map features
+        sketchRef.current = sketch; // store sketch in ref
+        view.ui.add(sketch, "top-right");
+
+        sketch.on("create", (event) => {
+          if (event.state === "complete") {
+            setDrawnGeometry(event.graphic.geometry);
+            setSelectedFeature(null);
+            setOpen(true);
+          }
+        });
+
         view.on("click", async (event) => {
           const response = await view.hitTest(event);
           const result = response.results.find((r) => r.graphic?.attributes);
           if (result) {
             setSelectedFeature(result.graphic);
-            setDrawnGeometry(null); // Clear any drawn feature
+            setDrawnGeometry(null);
             setOpen(true);
           }
         });
-
-        // Keep sketch visibility in sync with drawMode state
-        const interval = setInterval(() => {
-          sketch.visible = drawMode;
-        }, 200);
-
-        return () => clearInterval(interval); // Cleanup
       });
     };
 
     loadMap();
-  }, [drawMode]);
+  }, []);
 
-  // Submit form data to hosted feature layer
+  // Trigger drawing a new polygon manually
+  const startDrawing = () => {
+    if (sketchRef.current) {
+      sketchRef.current.create("polygon");
+    }
+  };
+
   const handleSubmit = async () => {
     const [FeatureLayer] = await Promise.all([
       import("@arcgis/core/layers/FeatureLayer"),
     ]);
 
     const responseLayer = new FeatureLayer.default({
-      url: "https://services.arcgis.com/envisionutah/arcgis/rest/services/Responses/FeatureServer/0", // Replace with your layer URL and CREATE this layer
+      url: "https://services.arcgis.com/YOUR_ORG_ID/arcgis/rest/services/Responses/FeatureServer/0",
     });
 
     const geometry = selectedFeature?.geometry || drawnGeometry;
-    if (!geometry) return; // Must have a geometry
+    if (!geometry) return;
 
-    // Construct feature attributes
     const newFeature = {
       geometry,
       attributes: {
@@ -150,11 +137,7 @@ export default function InteractiveReporterApp() {
     };
 
     try {
-      const result = await responseLayer.applyEdits({
-        addFeatures: [newFeature],
-      });
-
-      // Confirm success
+      const result = await responseLayer.applyEdits({ addFeatures: [newFeature] });
       if (result.addFeatureResults.length > 0 && !result.addFeatureResults[0].error) {
         alert("Feature submitted successfully!");
       } else {
@@ -165,7 +148,6 @@ export default function InteractiveReporterApp() {
       console.error("Error submitting feature:", error);
     }
 
-    // Reset form
     setOpen(false);
     setName("");
     setComment("");
@@ -178,7 +160,6 @@ export default function InteractiveReporterApp() {
   return (
     <Box display="flex" flexDirection="column" alignItems="center" p={4}>
       <Box width="100%" maxWidth="1500px">
-        {/* Title and instructions */}
         <Typography variant="h4" gutterBottom>
           MAG First Draft Centers Map Feedback
         </Typography>
@@ -186,9 +167,8 @@ export default function InteractiveReporterApp() {
           Click a feature on the map or draw a new one to leave feedback.
         </Typography>
 
-        {/* Buttons for drawing or commenting */}
         <Box display="flex" gap={2} mb={2}>
-          <Button variant="contained" onClick={() => setDrawMode(true)}>
+          <Button variant="contained" onClick={startDrawing}> {/* Fixed button to call startDrawing */}
             Add A Feature
           </Button>
           <Button variant="outlined" onClick={() => alert("Click a feature on the map to comment.")}>
@@ -196,7 +176,6 @@ export default function InteractiveReporterApp() {
           </Button>
         </Box>
 
-        {/* Map and Legend */}
         <Card sx={{ my: 2 }}>
           <CardContent sx={{ height: 750, display: 'flex' }}>
             <div ref={mapRef} style={{ width: "80%", height: "100%", borderRadius: 8 }} />
@@ -204,7 +183,6 @@ export default function InteractiveReporterApp() {
           </CardContent>
         </Card>
 
-        {/* Drawer form for submitting feedback */}
         <Drawer anchor="right" open={open} onClose={() => setOpen(false)}>
           <Box sx={{ width: 360, p: 2 }} role="presentation">
             <DialogTitle>Feature Feedback</DialogTitle>
@@ -238,7 +216,6 @@ export default function InteractiveReporterApp() {
           </Box>
         </Drawer>
 
-        {/* Footer note */}
         <Typography variant="caption" display="block" gutterBottom>
           Feedback is saved directly to the hosted feature layer "Responses".
         </Typography>
