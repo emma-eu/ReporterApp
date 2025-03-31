@@ -185,7 +185,7 @@ export default function InteractiveReporterApp() {
           MAG First Draft Centers Map Feedback
         </Typography>
         <Typography variant="body1" gutterBottom>
-          Click a feature on the map or draw a new one to leave feedback.
+          To leave feedback, click a feature on the map to leave a comment on that feature, or draw a new feature.
         </Typography>
 
         <Box display="flex" gap={2} mb={2}>
@@ -193,7 +193,7 @@ export default function InteractiveReporterApp() {
             Add A Feature
           </Button>
           <Button variant="contained" color="primary" onClick={() => alert("Click a feature on the map to comment.")}>
-            Click to Add A Comment
+            Comment on an Existing Feature
           </Button>
         </Box>
 
