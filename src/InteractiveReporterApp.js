@@ -198,7 +198,7 @@ export default function InteractiveReporterApp() {
         </Box>
 
         <Card sx={{ my: 2 }}>
-          <CardContent sx={{ height: 750, display: 'flex' }}>
+          <CardContent sx={{ height: 500, display: 'flex' }}>
             <div ref={mapRef} style={{ width: "80%", height: "100%", borderRadius: 8 }} />
             <div ref={legendRef} style={{ width: "20%", minWidth: 200, paddingLeft: 10, overflowY: "auto" }} />
           </CardContent>
