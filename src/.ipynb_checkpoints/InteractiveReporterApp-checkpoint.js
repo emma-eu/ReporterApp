@@ -180,8 +180,8 @@ export default function InteractiveReporterApp() {
 
   return (
     <Box display="flex" flexDirection="column" alignItems="center" p={4}>
-      <Box width="100%" maxWidth="1500px">
-        <Typography variant="h2" gutterBottom>
+      <Box width="100%" maxWidth="1000px">
+        <Typography variant="h5" gutterBottom>
           MAG First Draft Centers Map Feedback
         </Typography>
         <Typography variant="body1" gutterBottom>
@@ -198,7 +198,7 @@ export default function InteractiveReporterApp() {
         </Box>
 
         <Card sx={{ my: 2 }}>
-          <CardContent sx={{ height: 425, display: 'flex' }}>
+          <CardContent sx={{ height: 450, display: 'flex' }}>
             <div ref={mapRef} style={{ width: "80%", height: "100%", borderRadius: 2 }} />
             <div ref={legendRef} style={{ width: "20%", minWidth: 200, paddingLeft: 10, overflowY: "auto" }} />
           </CardContent>
