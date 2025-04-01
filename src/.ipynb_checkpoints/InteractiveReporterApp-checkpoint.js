@@ -180,7 +180,7 @@ export default function InteractiveReporterApp() {
 
   return (
     <Box display="flex" flexDirection="column" alignItems="center" p={4}>
-      <Box width="100%" maxWidth="1000px">
+      <Box width="100%" maxWidth="1250px">
         <Typography variant="h5" gutterBottom>
           MAG First Draft Centers Map Feedback
         </Typography>
