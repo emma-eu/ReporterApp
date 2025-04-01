@@ -216,7 +216,7 @@ export default function InteractiveReporterApp() {
                   <FormControlLabel control={<Checkbox checked={isCenter} onChange={(e) => setisCenter(e.target.checked)} />} label="This feature meets the characteristics of a center." />
                   <FormControlLabel control={<Checkbox checked={likesProject} onChange={(e) => setLikesProject(e.target.checked)} />} label="This center is correctly classified." />
                   <FormGroup>
-                    <Typography variant="h5">If the center is incorrectly classified, select the correct classification:</Typography>
+                    <Typography variant="h6">If the center is incorrectly classified, select the correct classification:</Typography>
                   </FormGroup>
                   <FormControl fullWidth margin="dense">
                     <InputLabel id="center-label">Center Classification</InputLabel>
