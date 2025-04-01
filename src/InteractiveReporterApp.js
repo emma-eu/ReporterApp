@@ -195,14 +195,14 @@ export default function InteractiveReporterApp() {
         </Card>
 
         <Drawer anchor="right" open={open} onClose={() => setOpen(false)}>
-          <Box sx={{ width: 360, p: 2 }} role="presentation">
+          <Box sx={{ width: 360, pt: 2, px: 2, pb: 1 }} role="presentation">
             <DialogTitle>Feature Feedback</DialogTitle>
             <DialogContent>
               <TextField label="Your Name" fullWidth margin="dense" value={name} onChange={(e) => setName(e.target.value)} />
               <TextField label="Your City/Organization" fullWidth margin="dense" value={organization} onChange={(e) => setOrganization(e.target.value)} />
               <TextField label="Add Your Comment Here" fullWidth margin="dense" multiline rows={4} value={comment} onChange={(e) => setComment(e.target.value)} />
               {drawnGeometry ? (
-                <FormControl fullWidth margin="dense">
+                <FormControl fullWidth sx={{ mb: 1 }}>>
                   <InputLabel id="center-label">Center Classification</InputLabel>
                   <Select labelId="center-label" value={priorityLevel} onChange={(e) => setPriorityLevel(e.target.value)}>
                     <MenuItem value="Metropolitan">Metropolitan</MenuItem>
