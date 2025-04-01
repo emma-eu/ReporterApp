@@ -213,9 +213,6 @@ export default function InteractiveReporterApp() {
                 </FormControl>
               ) : (
                 <>
-                  <Typography variant="body1" color="textSecondary" sx={{ mb: 2 }}>
-                    A center is defined as a walkable area where activity is focused, with places to live, work, and play...
-                  </Typography>
                   <FormControlLabel control={<Checkbox checked={isCenter} onChange={(e) => setisCenter(e.target.checked)} />} label="This feature meets the characteristics of a center." />
                   <FormControlLabel control={<Checkbox checked={likesProject} onChange={(e) => setLikesProject(e.target.checked)} />} label="This center is correctly classified." />
                   <FormGroup>
