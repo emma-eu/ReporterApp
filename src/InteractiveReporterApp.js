@@ -178,41 +178,59 @@ export default function InteractiveReporterApp() {
     setDrawnGeometry(null);
   };
 
-  return (
-    <Box display="flex" flexDirection="column" alignItems="center" p={4}>
-      <Box width="100%" maxWidth="1250px">
-        <Typography variant="h5" gutterBottom>
-          MAG First Draft Centers Map Feedback
-        </Typography>
-        <Typography variant="body1" gutterBottom>
-          To leave feedback, click a feature on the map to leave a comment on that feature, or draw a new feature.
-        </Typography>
+ return (
+  <Box display="flex" flexDirection="column" alignItems="center" p={4} pb={2}>
+    <Box width="100%" maxWidth="1250px">
+      <Typography variant="h4" gutterBottom>
+        MAG First Draft Centers Map Feedback
+      </Typography>
+      <Typography variant="body1" gutterBottom>
+        To leave feedback, click a feature on the map to leave a comment on that feature, or draw a new feature.
+      </Typography>
 
-        <Box display="flex" gap={2} mb={2}>
-          <Button variant="contained" color="primary" onClick={startDrawing}>
-            Add A Feature
-          </Button>
-          <Button variant="contained" color="primary" onClick={() => alert("Click a feature on the map to comment.")}>
-            Comment on an Existing Feature
-          </Button>
-        </Box>
+      <Box display="flex" gap={2} mb={2}>
+        <Button variant="contained" color="primary" onClick={startDrawing}>
+          Add A Feature
+        </Button>
+        <Button variant="contained" color="primary" onClick={() => alert("Click a feature on the map to comment.")}>
+          Comment on an Existing Feature
+        </Button>
+      </Box>
 
-        <Card sx={{ my: 2 }}>
-          <CardContent sx={{ height: 450, display: 'flex' }}>
-            <div ref={mapRef} style={{ width: "80%", height: "100%", borderRadius: 2 }} />
-            <div ref={legendRef} style={{ width: "20%", minWidth: 200, paddingLeft: 10, overflowY: "auto" }} />
-          </CardContent>
-        </Card>
+      <Card sx={{ my: 2, mb: 1 }}>
+        <CardContent sx={{ height: 450, display: 'flex' }}>
+          <div ref={mapRef} style={{ width: "80%", height: "100%", borderRadius: 2 }} />
+          <div ref={legendRef} style={{ width: "20%", minWidth: 200, paddingLeft: 10, overflowY: "auto" }} />
+        </CardContent>
+      </Card>
 
-        <Drawer anchor="right" open={open} onClose={() => setOpen(false)}>
-          <Box sx={{ width: 360, p: 2 }} role="presentation">
-            <DialogTitle>Feature Feedback</DialogTitle>
-            <DialogContent>
-              <TextField label="Your Name" fullWidth margin="dense" value={name} onChange={(e) => setName(e.target.value)} />
-              <TextField label="Your City/Organization" fullWidth margin="dense" value={organization} onChange={(e) => setOrganization(e.target.value)} />
-              <TextField label="Add Your Comment Here" fullWidth margin="dense" multiline rows={4} value={comment} onChange={(e) => setComment(e.target.value)} />
-              {drawnGeometry ? (
-                // Show simplified form for newly drawn features
+      <Drawer anchor="right" open={open} onClose={() => setOpen(false)}>
+        <Box sx={{ width: 360, p: 2 }} role="presentation">
+          <DialogTitle>Feature Feedback</DialogTitle>
+          <DialogContent>
+            <TextField label="Your Name" fullWidth margin="dense" value={name} onChange={(e) => setName(e.target.value)} />
+            <TextField label="Your City/Organization" fullWidth margin="dense" value={organization} onChange={(e) => setOrganization(e.target.value)} />
+            <TextField label="Add Your Comment Here" fullWidth margin="dense" multiline rows={4} value={comment} onChange={(e) => setComment(e.target.value)} />
+            {drawnGeometry ? (
+              <FormControl fullWidth margin="dense">
+                <InputLabel id="center-label">Center Classification</InputLabel>
+                <Select labelId="center-label" value={priorityLevel} onChange={(e) => setPriorityLevel(e.target.value)}>
+                  <MenuItem value="Metropolitan">Metropolitan</MenuItem>
+                  <MenuItem value="Urban">Urban</MenuItem>
+                  <MenuItem value="City">City</MenuItem>
+                  <MenuItem value="Neighborhood">Neighborhood</MenuItem>
+                </Select>
+              </FormControl>
+            ) : (
+              <>
+                <Typography variant="body1" color="textSecondary" sx={{ mb: 2 }}>
+                  A center is defined as a walkable area where activity is focused, with places to live, work, and play...
+                </Typography>
+                <FormControlLabel control={<Checkbox checked={isCenter} onChange={(e) => setisCenter(e.target.checked)} />} label="This feature meets the characteristics of a center." />
+                <FormControlLabel control={<Checkbox checked={likesProject} onChange={(e) => setLikesProject(e.target.checked)} />} label="This center is correctly classified." />
+                <FormGroup>
+                  <Typography variant="subtitle1">If the center is incorrectly classified, select the correct classification:</Typography>
+                </FormGroup>
                 <FormControl fullWidth margin="dense">
                   <InputLabel id="center-label">Center Classification</InputLabel>
                   <Select labelId="center-label" value={priorityLevel} onChange={(e) => setPriorityLevel(e.target.value)}>
@@ -220,53 +238,28 @@ export default function InteractiveReporterApp() {
                     <MenuItem value="Urban">Urban</MenuItem>
                     <MenuItem value="City">City</MenuItem>
                     <MenuItem value="Neighborhood">Neighborhood</MenuItem>
+                    <MenuItem value="NOT A CENTER">This is not a center</MenuItem>
                   </Select>
                 </FormControl>
-              ) : (
-                // Full form for clicked features
-                <>
-                  <Typography variant="body1" color="textSecondary" sx={{ mb: 2 }}>
-                    A center is defined as a walkable area where activity is focused, with places to live, work, and play...
-                  </Typography>
-                  <FormControlLabel control={<Checkbox checked={isCenter} onChange={(e) => setisCenter(e.target.checked)} />} label="This feature meets the characteristics of a center." />
-                  <FormControlLabel control={<Checkbox checked={likesProject} onChange={(e) => setLikesProject(e.target.checked)} />} label="This center is correctly classified." />
-                  <FormGroup>
-                    <Typography variant="subtitle1">If the center is incorrectly classified, select the correct classification:</Typography>
-                  </FormGroup>
-                  <FormControl fullWidth margin="dense">
-                    <InputLabel id="center-label">Center Classification</InputLabel>
-                    <Select labelId="center-label" value={priorityLevel} onChange={(e) => setPriorityLevel(e.target.value)}>
-                      <MenuItem value="Metropolitan">Metropolitan</MenuItem>
-                      <MenuItem value="Urban">Urban</MenuItem>
-                      <MenuItem value="City">City</MenuItem>
-                      <MenuItem value="Neighborhood">Neighborhood</MenuItem>
-                      <MenuItem value="NOT A CENTER">This is not a center</MenuItem>
-                    </Select>
-                  </FormControl>
-                </>
-              )}
-            </DialogContent>
-            <DialogActions>
-              {drawnGeometry && sketchRef.current && (
-                <Button color="error" onClick={() => {
-                  const layer = sketchRef.current.layer;
-                  layer.removeAll();
-                  setDrawnGeometry(null);
-                  setOpen(false);
-                }}>
-                  Delete Feature
-                </Button>
-              )}
-              <Button onClick={() => setOpen(false)}>Cancel</Button>
-              <Button onClick={handleSubmit} variant="contained" color="primary">Submit Feedback</Button>
-            </DialogActions>
-          </Box>
-        </Drawer>
-
-        <Typography variant="caption" display="block" gutterBottom>
-          Feedback is saved directly to the hosted feature layer "Responses".
-        </Typography>
-      </Box>
+              </>
+            )}
+          </DialogContent>
+          <DialogActions>
+            {drawnGeometry && sketchRef.current && (
+              <Button color="error" onClick={() => {
+                const layer = sketchRef.current.layer;
+                layer.removeAll();
+                setDrawnGeometry(null);
+                setOpen(false);
+              }}>
+                Delete Feature
+              </Button>
+            )}
+            <Button onClick={() => setOpen(false)}>Cancel</Button>
+            <Button onClick={handleSubmit} variant="contained" color="primary">Submit Feedback</Button>
+          </DialogActions>
+        </Box>
+      </Drawer>
     </Box>
-  );
-}
+  </Box>
+);
