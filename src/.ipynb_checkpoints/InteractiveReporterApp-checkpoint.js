@@ -175,7 +175,7 @@ export default function InteractiveReporterApp() {
           MAG First Draft Centers Map Feedback
         </Typography>
         <Typography variant="h6" gutterBottom>
-         Click on an existing feature to leave a comment on that feature, or click the "ADD A FEATURE" button to draw a new feature on the map.Double-click when you have finished digitizing the new feature.
+         Click on an existing feature to leave a comment on that feature, or click the "ADD A FEATURE" button to draw a new feature on the map. Double-click when you have finished digitizing the new feature.
         </Typography>
 
         <Box display="flex" gap={2} mb={2}>
@@ -215,7 +215,7 @@ export default function InteractiveReporterApp() {
                   <FormControlLabel control={<Checkbox checked={isCenter} onChange={(e) => setisCenter(e.target.checked)} />} label="This feature meets the characteristics of a center." />
                   <FormControlLabel control={<Checkbox checked={likesProject} onChange={(e) => setLikesProject(e.target.checked)} />} label="This center is correctly classified." />
                   <FormGroup>
-                    <Typography variant="subtitle1" sx={{ fontWeight: "bold" }}>If the center is incorrectly classified, select the correct classification</Typography>
+                    <Typography variant="subtitle1" sx={{ fontWeight: "bold" }}>If the center is incorrectly classified, select the correct classification from the options below: </Typography>
                   </FormGroup>
                   <FormControl fullWidth margin="dense">
                     <InputLabel id="center-label">Center Classification</InputLabel>
