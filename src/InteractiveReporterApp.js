@@ -174,16 +174,13 @@ export default function InteractiveReporterApp() {
         <Typography variant="h4" gutterBottom>
           MAG First Draft Centers Map Feedback
         </Typography>
-        <Typography variant="body1" gutterBottom>
-          To leave feedback, click a feature on the map to leave a comment on that feature, or draw a new feature.
+        <Typography variant="h6" gutterBottom>
+          To leave feedback, draw a new feature on the map using the button below.
         </Typography>
 
         <Box display="flex" gap={2} mb={2}>
           <Button variant="contained" color="primary" onClick={startDrawing}>
             Add A Feature
-          </Button>
-          <Button variant="contained" color="primary" onClick={() => alert("Click a feature on the map to comment.")}>
-            Comment on an Existing Feature
           </Button>
         </Box>
 
@@ -200,17 +197,19 @@ export default function InteractiveReporterApp() {
             <DialogContent>
               <TextField label="Your Name" fullWidth margin="dense" value={name} onChange={(e) => setName(e.target.value)} />
               <TextField label="Your City/Organization" fullWidth margin="dense" value={organization} onChange={(e) => setOrganization(e.target.value)} />
-              <TextField label="Add Your Comment Here" fullWidth margin="dense" multiline rows={4} value={comment} onChange={(e) => setComment(e.target.value)} />
               {drawnGeometry ? (
-                <FormControl fullWidth sx={{ mb: 1 }}>>
-                  <InputLabel id="center-label">Center Classification</InputLabel>
-                  <Select labelId="center-label" value={priorityLevel} onChange={(e) => setPriorityLevel(e.target.value)}>
-                    <MenuItem value="Metropolitan">Metropolitan</MenuItem>
-                    <MenuItem value="Urban">Urban</MenuItem>
-                    <MenuItem value="City">City</MenuItem>
-                    <MenuItem value="Neighborhood">Neighborhood</MenuItem>
-                  </Select>
-                </FormControl>
+                <>
+                  <FormControl fullWidth sx={{ mb: 1 }}>
+                    <InputLabel id="center-label">Center Classification</InputLabel>
+                    <Select labelId="center-label" value={priorityLevel} onChange={(e) => setPriorityLevel(e.target.value)}>
+                      <MenuItem value="Metropolitan">Metropolitan</MenuItem>
+                      <MenuItem value="Urban">Urban</MenuItem>
+                      <MenuItem value="City">City</MenuItem>
+                      <MenuItem value="Neighborhood">Neighborhood</MenuItem>
+                    </Select>
+                  </FormControl>
+                  <TextField label="Comment Here (Optional)" fullWidth margin="dense" multiline rows={4} value={comment} onChange={(e) => setComment(e.target.value)} />
+                </>
               ) : (
                 <>
                   <FormControlLabel control={<Checkbox checked={isCenter} onChange={(e) => setisCenter(e.target.checked)} />} label="This feature meets the characteristics of a center." />
@@ -228,6 +227,7 @@ export default function InteractiveReporterApp() {
                       <MenuItem value="NOT A CENTER">This is not a center</MenuItem>
                     </Select>
                   </FormControl>
+                  <TextField label="Comment Here (Optional)" fullWidth margin="dense" multiline rows={4} value={comment} onChange={(e) => setComment(e.target.value)} />
                 </>
               )}
             </DialogContent>
