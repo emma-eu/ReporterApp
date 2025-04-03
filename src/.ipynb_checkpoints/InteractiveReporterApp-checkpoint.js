@@ -1,4 +1,4 @@
-// NOTE: This update ensures the layout mirrors the OpenSpaceFeedbackReporter app: static textbox, zoom top-left, and sidebar legend.
+// NOTE: This update ensures the layout mirrors the OpenSpaceFeedbackReporter app: static textbox, zoom top-left, and sidebar legend — with extra tools removed.
 
 import { useEffect, useRef, useState } from "react";
 // Material UI components for layout and UI
@@ -49,7 +49,7 @@ export default function InteractiveReporterApp() {
         map: webmap,
         center: [-111.787301, 40.221715],
         zoom: 10.5,
-        ui: { components: ["attribution"] },
+        ui: { components: ["zoom", "attribution"] },
       });
 
       setView(view);
@@ -58,8 +58,7 @@ export default function InteractiveReporterApp() {
         const graphicsLayer = new GraphicsLayer.default();
         view.map.add(graphicsLayer);
 
-        view.ui.add("zoom", "top-left");
-
+        // Add info box to top-left
         const infoDiv = document.createElement("div");
         infoDiv.innerHTML = "🛈 Use the +/- to zoom. Click and drag to pan.";
         infoDiv.style.padding = "6px 12px";
@@ -68,9 +67,9 @@ export default function InteractiveReporterApp() {
         infoDiv.style.borderRadius = "4px";
         infoDiv.style.boxShadow = "0 2px 4px rgba(0,0,0,0.2)";
         infoDiv.style.maxWidth = "200px";
-        infoDiv.style.zIndex = 10;
-        view.ui.add(infoDiv, "top-right");
+        view.ui.add(infoDiv, "top-left");
 
+        // Add legend to sidebar
         new Legend({ view, container: legendRef.current });
 
         const sketch = new Sketch.default({
@@ -90,7 +89,6 @@ export default function InteractiveReporterApp() {
         });
 
         sketchRef.current = sketch;
-        view.ui.add(sketch, "top-right");
 
         sketch.on("create", (event) => {
           if (event.state === "start") alert("Sketch mode: Click to place vertices. Double-click to finish the shape.");
