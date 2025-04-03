@@ -65,7 +65,11 @@ export default function InteractiveReporterApp() {
 
         const graphicsLayer = new GraphicsLayer.default();
         view.map.add(graphicsLayer);
-
+          
+      view.when(() => {
+        const legend = new Legend({ view });
+        if (legendRef.current) legend.container = legendRef.current;
+          
         // Add static text box to the top-left of the map
         const infoDiv = document.createElement("div");
         infoDiv.innerHTML = "🛈 Use the +/- or two fingers on the screen to zoom. To pan, click and drag the map.";
@@ -76,7 +80,7 @@ export default function InteractiveReporterApp() {
         infoDiv.style.boxShadow = "0 2px 4px rgba(0,0,0,0.2)";
         infoDiv.style.maxWidth = "220px";
         view.ui.add(infoDiv, "top-right");
-
+       });
         const sketch = new Sketch.default({
           layer: graphicsLayer,
           view,
