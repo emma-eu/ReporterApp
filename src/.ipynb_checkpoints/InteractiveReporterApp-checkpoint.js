@@ -14,16 +14,10 @@ import DialogActions from "@mui/material/DialogActions";
 import TextField from "@mui/material/TextField";
 import Checkbox from "@mui/material/Checkbox";
 import FormControlLabel from "@mui/material/FormControlLabel";
-import FormGroup from "@mui/material/FormGroup";
-import FormControl from "@mui/material/FormControl";
-import InputLabel from "@mui/material/InputLabel";
-import Select from "@mui/material/Select";
-import MenuItem from "@mui/material/MenuItem";
 import "@arcgis/core/assets/esri/themes/light/main.css";
 
 export default function InteractiveReporterApp() {
   const mapRef = useRef(null);
-  const legendRef = useRef(null);
   const sketchRef = useRef(null);
   const viewRef = useRef(null);
 
@@ -59,20 +53,19 @@ export default function InteractiveReporterApp() {
 
       viewRef.current = view;
 
+      // Add legend with expand widget
       const legend = new Legend.default({ view });
-      const legendExpand = new Expand.default({
-        view,
-        content: legend,
-        expanded: true,
-      });
+      const legendExpand = new Expand.default({ view, content: legend, expanded: true });
       view.ui.add(legendExpand, "bottom-right");
 
+      // Add static text box to map area
       const infoNode = document.createElement("div");
       infoNode.style.padding = "10px";
       infoNode.style.background = "white";
       infoNode.style.boxShadow = "0 2px 6px rgba(0,0,0,0.3)";
       infoNode.style.borderRadius = "4px";
       infoNode.style.maxWidth = "250px";
+      infoNode.style.fontSize = "14px";
       infoNode.innerHTML = "<strong>Instructions:</strong><br>Click a feature or draw a new one.";
       view.ui.add(infoNode, "top-right");
 
