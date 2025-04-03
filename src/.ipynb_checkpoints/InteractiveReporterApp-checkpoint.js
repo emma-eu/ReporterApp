@@ -60,7 +60,7 @@ export default function InteractiveReporterApp() {
 
         // Add info box to top-left
         const infoDiv = document.createElement("div");
-        infoDiv.innerHTML = "🛈 Use the +/- to zoom. Click and drag to pan.";
+        infoDiv.innerHTML = "🛈 Use the +/- or two fingers on your trackpad to zoom. Click and drag to pan.";
         infoDiv.style.padding = "6px 12px";
         infoDiv.style.background = "rgba(255, 255, 255, 0.9)";
         infoDiv.style.fontSize = "13px";
