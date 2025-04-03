@@ -1,4 +1,4 @@
-// NOTE: This update restores the legend, keeps the static text box on the map, and keeps the zoom controls in the upper-left corner.
+// NOTE: This update restores the legend, keeps the static text box on the map, and moves the zoom controls to the upper-left corner.
 
 import { useEffect, useRef, useState } from "react";
 // Material UI components for layout and UI
@@ -58,16 +58,23 @@ export default function InteractiveReporterApp() {
       const legendExpand = new Expand.default({ view, content: legend, expanded: true });
       view.ui.add(legendExpand, "bottom-right");
 
-      // Add static text box to map area
-      const infoNode = document.createElement("div");
-      infoNode.style.padding = "10px";
-      infoNode.style.background = "white";
-      infoNode.style.boxShadow = "0 2px 6px rgba(0,0,0,0.3)";
-      infoNode.style.borderRadius = "4px";
-      infoNode.style.maxWidth = "250px";
-      infoNode.style.fontSize = "14px";
-      infoNode.innerHTML = "<strong>Instructions:</strong><br>Click a feature or draw a new one.";
-      view.ui.add(infoNode, "top-right");
+      // Add static text box directly to the map container
+      const infoBox = document.createElement("div");
+      infoBox.style.position = "absolute";
+      infoBox.style.top = "15px";
+      infoBox.style.right = "15px";
+      infoBox.style.padding = "10px";
+      infoBox.style.background = "white";
+      infoBox.style.boxShadow = "0 2px 6px rgba(0,0,0,0.3)";
+      infoBox.style.borderRadius = "4px";
+      infoBox.style.maxWidth = "250px";
+      infoBox.style.fontSize = "14px";
+      infoBox.style.zIndex = 99;
+      infoBox.innerHTML = "<strong>Instructions:</strong><br>Click a feature or draw a new one.";
+
+      if (mapRef.current) {
+        mapRef.current.appendChild(infoBox);
+      }
 
       view.ui.move("zoom", "top-left");
 
@@ -198,7 +205,7 @@ export default function InteractiveReporterApp() {
 
         <Card sx={{ my: 2, mb: 1 }}>
           <CardContent sx={{ height: 500, display: "flex" }}>
-            <div ref={mapRef} style={{ width: "100%", height: "100%", borderRadius: 2 }} />
+            <div ref={mapRef} style={{ width: "100%", height: "100%", borderRadius: 2, position: "relative" }} />
           </CardContent>
         </Card>
 
