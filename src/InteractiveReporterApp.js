@@ -1,4 +1,4 @@
-// NOTE: This update restores the legend to the sidebar, keeps the static text box on the map, and positions the zoom controls in the upper-left corner.
+// NOTE: This update ensures the layout mirrors the OpenSpaceFeedbackReporter app: static textbox, zoom top-left, and sidebar legend.
 
 import { useEffect, useRef, useState } from "react";
 // Material UI components for layout and UI
@@ -65,10 +65,10 @@ export default function InteractiveReporterApp() {
         const graphicsLayer = new GraphicsLayer.default();
         view.map.add(graphicsLayer);
 
-        // Add zoom to top-left
+        // Zoom controls top-left
         view.ui.add("zoom", "top-left");
 
-        // Static text box
+        // Static text box on map
         const infoDiv = document.createElement("div");
         infoDiv.innerHTML = "🛈 Use the +/- to zoom. Click and drag to pan.";
         infoDiv.style.padding = "6px 12px";
@@ -80,8 +80,8 @@ export default function InteractiveReporterApp() {
         infoDiv.style.zIndex = 10;
         view.ui.add(infoDiv, "top-right");
 
-        // Add legend to legendRef container outside the map
-        const legend = new Legend({ view, container: legendRef.current });
+        // Sidebar legend
+        new Legend({ view, container: legendRef.current });
 
         const sketch = new Sketch.default({
           layer: graphicsLayer,
@@ -103,9 +103,7 @@ export default function InteractiveReporterApp() {
         view.ui.add(sketch, "top-right");
 
         sketch.on("create", (event) => {
-          if (event.state === "start") {
-            alert("Sketch mode: Click to place vertices. Double-click to finish the shape.");
-          }
+          if (event.state === "start") alert("Sketch mode: Click to place vertices. Double-click to finish the shape.");
           if (event.state === "complete") {
             setDrawnGeometry(event.graphic.geometry);
             setSelectedFeature(null);
@@ -129,9 +127,7 @@ export default function InteractiveReporterApp() {
   }, []);
 
   const startDrawing = () => {
-    if (sketchRef.current) {
-      sketchRef.current.create("polygon");
-    }
+    if (sketchRef.current) sketchRef.current.create("polygon");
   };
 
   const handleSubmit = async () => {
