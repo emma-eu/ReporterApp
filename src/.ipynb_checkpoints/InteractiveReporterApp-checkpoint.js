@@ -55,7 +55,7 @@ export default function InteractiveReporterApp() {
         map: webmap,
         center: [-111.787301, 40.221715],
         zoom: 10.5,
-        ui: { components: ["zoom", "attribution"] } // ✅ Fix: Include zoom
+        ui: { components: ["zoom", "attribution"] },
       });
 
       setView(view);
@@ -67,18 +67,17 @@ export default function InteractiveReporterApp() {
         const graphicsLayer = new GraphicsLayer.default();
         view.map.add(graphicsLayer);
 
-        // Static text box UI element in upper right
         const infoDiv = document.createElement("div");
-        infoDiv.innerHTML = "🛈 Use the +/- or two fingers on the screen to zoom. To pan, click and drag the map.";
+        infoDiv.innerHTML = "🛈 Use the +/- to zoom. Click and drag to pan.";
         infoDiv.style.padding = "6px 12px";
-        infoDiv.style.background = "rgba(255, 255, 255, 0.8)";
+        infoDiv.style.background = "rgba(255, 255, 255, 0.9)";
         infoDiv.style.fontSize = "13px";
         infoDiv.style.borderRadius = "4px";
         infoDiv.style.boxShadow = "0 2px 4px rgba(0,0,0,0.2)";
-        infoDiv.style.maxWidth = "220px";
+        infoDiv.style.maxWidth = "200px";
+        infoDiv.style.zIndex = 10;
         view.ui.add(infoDiv, { position: "top-right", index: 1 });
 
-        // Move zoom controls to top-left
         view.ui.move("zoom", "top-left");
 
         const sketch = new Sketch.default({
