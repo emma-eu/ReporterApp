@@ -14,6 +14,10 @@ import DialogActions from "@mui/material/DialogActions";
 import TextField from "@mui/material/TextField";
 import Checkbox from "@mui/material/Checkbox";
 import FormControlLabel from "@mui/material/FormControlLabel";
+import FormControl from "@mui/material/FormControl";
+import InputLabel from "@mui/material/InputLabel";
+import Select from "@mui/material/Select";
+import MenuItem from "@mui/material/MenuItem";
 import Legend from "@arcgis/core/widgets/Legend";
 import "@arcgis/core/assets/esri/themes/light/main.css";
 
@@ -30,6 +34,7 @@ export default function InteractiveReporterApp() {
   const [organization, setOrganization] = useState("");
   const [comment, setComment] = useState("");
   const [isCenter, setisCenter] = useState(false);
+  const [priorityLevel, setPriorityLevel] = useState("");
 
   useEffect(() => {
     const loadMap = async () => {
@@ -67,7 +72,7 @@ export default function InteractiveReporterApp() {
         infoDiv.style.borderRadius = "4px";
         infoDiv.style.boxShadow = "0 2px 4px rgba(0,0,0,0.2)";
         infoDiv.style.maxWidth = "200px";
-        view.ui.add(infoDiv, "top-right");
+        view.ui.add(infoDiv, "top-left");
 
         // Add legend to sidebar
         new Legend({ view, container: legendRef.current });
@@ -138,6 +143,7 @@ export default function InteractiveReporterApp() {
         organization,
         submittedcomment: comment,
         is_center: isCenter ? 1 : 0,
+        priority_level: priorityLevel,
         submitted_at: new Date().toISOString(),
         related_feature_id: selectedFeature?.attributes?.OBJECTID || null
       },
@@ -162,6 +168,7 @@ export default function InteractiveReporterApp() {
     setDrawnGeometry(null);
     setisCenter(false);
     setOrganization("");
+    setPriorityLevel("");
   };
 
   return (
@@ -194,6 +201,23 @@ export default function InteractiveReporterApp() {
               <TextField label="Your Name" fullWidth margin="dense" value={name} onChange={(e) => setName(e.target.value)} />
               <TextField label="Your City/Organization" fullWidth margin="dense" value={organization} onChange={(e) => setOrganization(e.target.value)} />
               <FormControlLabel control={<Checkbox checked={isCenter} onChange={(e) => setisCenter(e.target.checked)} />} label="This feature meets the characteristics of a center." />
+              <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
+                If this center is incorrectly classified, please choose the correct classification below:
+              </Typography>
+              <FormControl fullWidth margin="dense">
+                <InputLabel>Center Classification</InputLabel>
+                <Select
+                  value={priorityLevel}
+                  onChange={(e) => setPriorityLevel(e.target.value)}
+                  label="Center Classification"
+                >
+                  <MenuItem value="Metropolitan">Metropolitan</MenuItem>
+                  <MenuItem value="Urban">Urban</MenuItem>
+                  <MenuItem value="City">City</MenuItem>
+                  <MenuItem value="Neighborhood">Neighborhood</MenuItem>
+                  <MenuItem value="NOT A CENTER">This is not a center</MenuItem>
+                </Select>
+              </FormControl>
               <TextField label="Comment Here (Optional)" fullWidth margin="dense" multiline rows={4} value={comment} onChange={(e) => setComment(e.target.value)} />
             </DialogContent>
             <DialogActions>
@@ -216,3 +240,4 @@ export default function InteractiveReporterApp() {
     </Box>
   );
 }
+
