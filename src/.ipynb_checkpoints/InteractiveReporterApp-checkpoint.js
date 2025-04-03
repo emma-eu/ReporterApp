@@ -55,37 +55,31 @@ export default function InteractiveReporterApp() {
         map: webmap,
         center: [-111.787301, 40.221715],
         zoom: 10.5,
-        ui: {
-          components: ["attribution", "zoom"]
-        }
+        ui: { components: ["attribution"] }
       });
 
       setView(view);
 
       view.when(async () => {
-        // Move zoom controls to top-left
-        view.ui.move("zoom", "top-left");
+        const legend = new Legend({ view });
+        if (legendRef.current) legend.container = legendRef.current;
 
-        // Add static text box
+        const graphicsLayer = new GraphicsLayer.default();
+        view.map.add(graphicsLayer);
+
+        // Static text box UI element in upper right
         const infoDiv = document.createElement("div");
         infoDiv.innerHTML = "🛈 Use the +/- or two fingers on the screen to zoom. To pan, click and drag the map.";
-        infoDiv.style.position = "absolute";
-        infoDiv.style.top = "10px";
-        infoDiv.style.left = "10px";
         infoDiv.style.padding = "6px 12px";
         infoDiv.style.background = "rgba(255, 255, 255, 0.8)";
         infoDiv.style.fontSize = "13px";
         infoDiv.style.borderRadius = "4px";
         infoDiv.style.boxShadow = "0 2px 4px rgba(0,0,0,0.2)";
         infoDiv.style.maxWidth = "220px";
-        infoDiv.style.zIndex = "10";
-        view.ui.add(infoDiv, "manual");
+        view.ui.add(infoDiv, { position: "top-right", index: 1 });
 
-        const legend = new Legend({ view });
-        if (legendRef.current) legend.container = legendRef.current;
-
-        const graphicsLayer = new GraphicsLayer.default();
-        view.map.add(graphicsLayer);
+        // Move zoom controls to top-left
+        view.ui.move("zoom", "top-left");
 
         const sketch = new Sketch.default({
           layer: graphicsLayer,
@@ -135,4 +129,140 @@ export default function InteractiveReporterApp() {
     loadMap();
   }, []);
 
-  // ... rest of the code remains unchanged
+  const startDrawing = () => {
+    if (sketchRef.current) {
+      sketchRef.current.create("polygon");
+    }
+  };
+
+  const handleSubmit = async () => {
+    const [FeatureLayer] = await Promise.all([
+      import("@arcgis/core/layers/FeatureLayer"),
+    ]);
+
+    const responseLayer = new FeatureLayer.default({
+      url: "https://services6.arcgis.com/MLUVmF7LMfvzoHjV/arcgis/rest/services/CenterResponses/FeatureServer/0",
+    });
+
+    const geometry = selectedFeature?.geometry || drawnGeometry;
+    if (!geometry) return;
+
+    const newFeature = {
+      geometry,
+      attributes: {
+        feature_origin: drawnGeometry ? 1 : 0,
+        name,
+        organization,
+        submittedcomment: comment,
+        is_center: isCenter ? 1 : 0,
+        correct_type: likesProject ? 1 : 0,
+        updated_type: priorityLevel,
+        submitted_at: new Date().toISOString(),
+        related_feature_id: selectedFeature?.attributes?.OBJECTID || null
+      },
+    };
+
+    try {
+      const result = await responseLayer.applyEdits({ addFeatures: [newFeature] });
+      if (result.addFeatureResults.length > 0 && !result.addFeatureResults[0].error) {
+        alert("Feature submitted successfully!");
+      } else {
+        alert("Submission failed.");
+        console.error(result);
+      }
+    } catch (error) {
+      console.error("Error submitting feature:", error);
+    }
+
+    setOpen(false);
+    setName("");
+    setComment("");
+    setLikesProject(false);
+    setPriorityLevel("");
+    setSelectedFeature(null);
+    setDrawnGeometry(null);
+  };
+
+  return (
+    <Box display="flex" flexDirection="column" alignItems="center" p={4} pb={2}>
+      <Box width="100%" maxWidth="1250px">
+        <Typography variant="h4" gutterBottom>
+          MAG First Draft Centers Map Feedback
+        </Typography>
+        <Typography variant="h6" gutterBottom>
+         Click on an existing feature to leave a comment on that feature, or click the "ADD A FEATURE" button to draw a new feature on the map. Double-click when you have finished digitizing the new feature.
+        </Typography>
+
+        <Box display="flex" gap={2} mb={2}>
+          <Button variant="contained" color="primary" onClick={startDrawing}>
+            Add A Feature
+          </Button>
+        </Box>
+
+        <Card sx={{ my: 2, mb: 1 }}>
+          <CardContent sx={{ height: 450, display: 'flex' }}>
+            <div ref={mapRef} style={{ width: "80%", height: "100%", borderRadius: 2 }} />
+            <div ref={legendRef} style={{ width: "20%", minWidth: 200, paddingLeft: 10, overflowY: "auto" }} />
+          </CardContent>
+        </Card>
+
+        <Drawer anchor="right" open={open} onClose={() => setOpen(false)}>
+          <Box sx={{ width: 360, pt: 2, px: 2, pb: 1 }} role="presentation">
+            <DialogTitle>Feature Feedback</DialogTitle>
+            <DialogContent>
+              <TextField label="Your Name" fullWidth margin="dense" value={name} onChange={(e) => setName(e.target.value)} />
+              <TextField label="Your City/Organization" fullWidth margin="dense" value={organization} onChange={(e) => setOrganization(e.target.value)} />
+              {drawnGeometry ? (
+                <>
+                  <FormControl fullWidth sx={{ mb: 1 }}>
+                    <InputLabel id="center-label">Center Classification</InputLabel>
+                    <Select labelId="center-label" value={priorityLevel} onChange={(e) => setPriorityLevel(e.target.value)}>
+                      <MenuItem value="Metropolitan">Metropolitan</MenuItem>
+                      <MenuItem value="Urban">Urban</MenuItem>
+                      <MenuItem value="City">City</MenuItem>
+                      <MenuItem value="Neighborhood">Neighborhood</MenuItem>
+                    </Select>
+                  </FormControl>
+                  <TextField label="Comment Here (Optional)" fullWidth margin="dense" multiline rows={4} value={comment} onChange={(e) => setComment(e.target.value)} />
+                </>
+              ) : (
+                <>
+                  <FormControlLabel control={<Checkbox checked={isCenter} onChange={(e) => setisCenter(e.target.checked)} />} label="This feature meets the characteristics of a center." />
+                  <FormControlLabel control={<Checkbox checked={likesProject} onChange={(e) => setLikesProject(e.target.checked)} />} label="This center is correctly classified." />
+                  <FormGroup>
+                    <Typography variant="subtitle1" sx={{ fontWeight: "bold" }}>If the center is incorrectly classified, select the correct classification from the options below: </Typography>
+                  </FormGroup>
+                  <FormControl fullWidth margin="dense">
+                    <InputLabel id="center-label">Center Classification</InputLabel>
+                    <Select labelId="center-label" value={priorityLevel} onChange={(e) => setPriorityLevel(e.target.value)}>
+                      <MenuItem value="Metropolitan">Metropolitan</MenuItem>
+                      <MenuItem value="Urban">Urban</MenuItem>
+                      <MenuItem value="City">City</MenuItem>
+                      <MenuItem value="Neighborhood">Neighborhood</MenuItem>
+                      <MenuItem value="NOT A CENTER">This is not a center</MenuItem>
+                    </Select>
+                  </FormControl>
+                  <TextField label="Comment Here (Optional)" fullWidth margin="dense" multiline rows={4} value={comment} onChange={(e) => setComment(e.target.value)} />
+                </>
+              )}
+            </DialogContent>
+            <DialogActions>
+              {drawnGeometry && sketchRef.current && (
+                <Button color="error" onClick={() => {
+                  const layer = sketchRef.current.layer;
+                  layer.removeAll();
+                  setDrawnGeometry(null);
+                  setOpen(false);
+                }}>
+                  Delete Feature
+                </Button>
+              )}
+              <Button onClick={() => setOpen(false)}>Cancel</Button>
+              <Button onClick={handleSubmit} variant="contained" color="primary">Submit Feedback</Button>
+            </DialogActions>
+          </Box>
+        </Drawer>
+      </Box>
+    </Box>
+  );
+}
