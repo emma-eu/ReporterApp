@@ -1,4 +1,4 @@
-// NOTE: This update restores the legend, keeps the static text box on the map, and keeps the zoom controls in the upper-left corner.
+// NOTE: This update restores the legend to the sidebar, keeps the static text box on the map, and positions the zoom controls in the upper-left corner.
 
 import { useEffect, useRef, useState } from "react";
 // Material UI components for layout and UI
@@ -68,11 +68,7 @@ export default function InteractiveReporterApp() {
         // Add zoom to top-left
         view.ui.add("zoom", "top-left");
 
-        // Add the legend to the bottom-right
-        const legend = new Legend({ view });
-        view.ui.add(legend, "bottom-right");
-
-        // Add static text box to top-right
+        // Static text box
         const infoDiv = document.createElement("div");
         infoDiv.innerHTML = "🛈 Use the +/- to zoom. Click and drag to pan.";
         infoDiv.style.padding = "6px 12px";
@@ -83,6 +79,9 @@ export default function InteractiveReporterApp() {
         infoDiv.style.maxWidth = "200px";
         infoDiv.style.zIndex = 10;
         view.ui.add(infoDiv, "top-right");
+
+        // Add legend to legendRef container outside the map
+        const legend = new Legend({ view, container: legendRef.current });
 
         const sketch = new Sketch.default({
           layer: graphicsLayer,
