@@ -23,7 +23,6 @@ import Legend from "@arcgis/core/widgets/Legend"; // ArcGIS Legend widget
 
 export default function InteractiveReporterApp() {
   const mapRef = useRef(null);
-  const legendRef = useRef(null);
   const sketchRef = useRef(null);
   const [, setView] = useState(null);
 
@@ -55,15 +54,12 @@ export default function InteractiveReporterApp() {
         map: webmap,
         center: [-111.787301, 40.221715],
         zoom: 10.5,
-        ui: { components: ["zoom", "attribution"] },
+        ui: { components: ["attribution"] },
       });
 
       setView(view);
 
       view.when(async () => {
-        const legend = new Legend({ view });
-        if (legendRef.current) legend.container = legendRef.current;
-
         const graphicsLayer = new GraphicsLayer.default();
         view.map.add(graphicsLayer);
 
@@ -75,10 +71,13 @@ export default function InteractiveReporterApp() {
         infoDiv.style.borderRadius = "4px";
         infoDiv.style.boxShadow = "0 2px 4px rgba(0,0,0,0.2)";
         infoDiv.style.maxWidth = "200px";
+        infoDiv.style.position = "absolute";
+        infoDiv.style.top = "10px";
+        infoDiv.style.right = "10px";
         infoDiv.style.zIndex = 10;
-        view.ui.add(infoDiv, { position: "top-right", index: 1 });
+        mapRef.current.appendChild(infoDiv);
 
-        view.ui.move("zoom", "top-left");
+        view.ui.add("zoom", "top-left");
 
         const sketch = new Sketch.default({
           layer: graphicsLayer,
@@ -199,9 +198,9 @@ export default function InteractiveReporterApp() {
         </Box>
 
         <Card sx={{ my: 2, mb: 1 }}>
-          <CardContent sx={{ height: 450, display: 'flex' }}>
-            <div ref={mapRef} style={{ width: "80%", height: "100%", borderRadius: 2 }} />
-            <div ref={legendRef} style={{ width: "20%", minWidth: 200, paddingLeft: 10, overflowY: "auto" }} />
+          <CardContent sx={{ height: 450, display: 'flex', position: 'relative' }}>
+            <div ref={mapRef} style={{ width: "80%", height: "100%", borderRadius: 2, position: "relative" }} />
+            <div style={{ width: "20%", minWidth: 200, paddingLeft: 10, overflowY: "auto" }} />
           </CardContent>
         </Card>
 
