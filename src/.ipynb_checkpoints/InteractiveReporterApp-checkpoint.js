@@ -63,7 +63,6 @@ export default function InteractiveReporterApp() {
         const graphicsLayer = new GraphicsLayer.default();
         view.map.add(graphicsLayer);
 
-        // Add info box to top-left
         const infoDiv = document.createElement("div");
         infoDiv.innerHTML = "🛈 Use the +/- or two fingers on your trackpad to zoom. Click and drag to pan.";
         infoDiv.style.padding = "6px 12px";
@@ -74,7 +73,6 @@ export default function InteractiveReporterApp() {
         infoDiv.style.maxWidth = "200px";
         view.ui.add(infoDiv, "top-left");
 
-        // Add legend to sidebar
         new Legend({ view, container: legendRef.current });
 
         const sketch = new Sketch.default({
@@ -202,26 +200,49 @@ export default function InteractiveReporterApp() {
             <DialogContent>
               <TextField label="Your Name" fullWidth margin="dense" value={name} onChange={(e) => setName(e.target.value)} />
               <TextField label="Your City/Organization" fullWidth margin="dense" value={organization} onChange={(e) => setOrganization(e.target.value)} />
-              {!isUserCreatedFeature && (
-                <FormControlLabel control={<Checkbox checked={isCenter} onChange={(e) => setisCenter(e.target.checked)} />} label="This feature meets the characteristics of a center." />
+
+              {isUserCreatedFeature ? (
+                <>
+                  <Typography variant="subtitle1" sx={{ fontWeight: 'bold', fontSize: '1rem', mt: 2 }}>
+                    Select a classification for this new center:
+                  </Typography>
+                  <FormControl fullWidth margin="dense">
+                    <InputLabel>Center Classification</InputLabel>
+                    <Select
+                      value={priorityLevel}
+                      onChange={(e) => setPriorityLevel(e.target.value)}
+                      label="Center Classification"
+                    >
+                      <MenuItem value="Metropolitan">Metropolitan</MenuItem>
+                      <MenuItem value="Urban">Urban</MenuItem>
+                      <MenuItem value="City">City</MenuItem>
+                      <MenuItem value="Neighborhood">Neighborhood</MenuItem>
+                    </Select>
+                  </FormControl>
+                </>
+              ) : (
+                <>
+                  <FormControlLabel control={<Checkbox checked={isCenter} onChange={(e) => setisCenter(e.target.checked)} />} label="This feature meets the characteristics of a center." />
+                  <Typography variant="subtitle1" sx={{ fontWeight: 'bold', fontSize: '1rem', mt: 2 }}>
+                    If the classification for this center is incorrect in the current map, select the correct classification for this center:
+                  </Typography>
+                  <FormControl fullWidth margin="dense">
+                    <InputLabel>Center Classification</InputLabel>
+                    <Select
+                      value={priorityLevel}
+                      onChange={(e) => setPriorityLevel(e.target.value)}
+                      label="Center Classification"
+                    >
+                      <MenuItem value="Metropolitan">Metropolitan</MenuItem>
+                      <MenuItem value="Urban">Urban</MenuItem>
+                      <MenuItem value="City">City</MenuItem>
+                      <MenuItem value="Neighborhood">Neighborhood</MenuItem>
+                      <MenuItem value="NOT A CENTER">This is not a center</MenuItem>
+                    </Select>
+                  </FormControl>
+                </>
               )}
-              <Typography variant="subtitle1" sx={{ fontWeight: 'bold', fontSize: '1rem', mt: 2 }}>
-                If the classification for this center is incorrect in the current map, select the correct classification for this center:
-              </Typography>
-              <FormControl fullWidth margin="dense">
-                <InputLabel>Center Classification</InputLabel>
-                <Select
-                  value={priorityLevel}
-                  onChange={(e) => setPriorityLevel(e.target.value)}
-                  label="Center Classification"
-                >
-                  <MenuItem value="Metropolitan">Metropolitan</MenuItem>
-                  <MenuItem value="Urban">Urban</MenuItem>
-                  <MenuItem value="City">City</MenuItem>
-                  <MenuItem value="Neighborhood">Neighborhood</MenuItem>
-                  {!isUserCreatedFeature && <MenuItem value="NOT A CENTER">This is not a center</MenuItem>}
-                </Select>
-              </FormControl>
+
               <TextField label="Comment Here (Optional)" fullWidth margin="dense" multiline rows={4} value={comment} onChange={(e) => setComment(e.target.value)} />
             </DialogContent>
             <DialogActions>
