@@ -202,8 +202,11 @@ export default function InteractiveReporterApp() {
             <DialogContent>
               <TextField label="Your Name" fullWidth margin="dense" value={name} onChange={(e) => setName(e.target.value)} />
               <TextField label="Your City/Organization" fullWidth margin="dense" value={organization} onChange={(e) => setOrganization(e.target.value)} />
+              {!isUserCreatedFeature && (
+                <FormControlLabel control={<Checkbox checked={isCenter} onChange={(e) => setisCenter(e.target.checked)} />} label="This feature meets the characteristics of a center." />
+              )}
               <Typography variant="subtitle1" sx={{ fontWeight: 'bold', fontSize: '1rem', mt: 2 }}>
-                Select the correct classification for this center:
+                If the classification for this center is incorrect in the current map, select the correct classification for this center:
               </Typography>
               <FormControl fullWidth margin="dense">
                 <InputLabel>Center Classification</InputLabel>
@@ -219,14 +222,6 @@ export default function InteractiveReporterApp() {
                   {!isUserCreatedFeature && <MenuItem value="NOT A CENTER">This is not a center</MenuItem>}
                 </Select>
               </FormControl>
-              {!isUserCreatedFeature && (
-                <>
-                  <FormControlLabel control={<Checkbox checked={isCenter} onChange={(e) => setisCenter(e.target.checked)} />} label="This feature meets the characteristics of a center." />
-                  <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
-                    If this center is incorrectly classified, please choose the correct classification below:
-                  </Typography>
-                </>
-              )}
               <TextField label="Comment Here (Optional)" fullWidth margin="dense" multiline rows={4} value={comment} onChange={(e) => setComment(e.target.value)} />
             </DialogContent>
             <DialogActions>
