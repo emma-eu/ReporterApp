@@ -55,7 +55,7 @@ export default function InteractiveReporterApp() {
         map: webmap,
         center: [-111.787301, 40.221715],
         zoom: 10.5,
-        ui: { components: ["attribution"] }
+        ui: { components: ["zoom", "attribution"] } // ✅ Fix: Include zoom
       });
 
       setView(view);
