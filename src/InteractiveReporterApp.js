@@ -14,11 +14,6 @@ import DialogActions from "@mui/material/DialogActions";
 import TextField from "@mui/material/TextField";
 import Checkbox from "@mui/material/Checkbox";
 import FormControlLabel from "@mui/material/FormControlLabel";
-import FormGroup from "@mui/material/FormGroup";
-import FormControl from "@mui/material/FormControl";
-import InputLabel from "@mui/material/InputLabel";
-import Select from "@mui/material/Select";
-import MenuItem from "@mui/material/MenuItem";
 import Legend from "@arcgis/core/widgets/Legend";
 import "@arcgis/core/assets/esri/themes/light/main.css";
 
@@ -35,8 +30,6 @@ export default function InteractiveReporterApp() {
   const [organization, setOrganization] = useState("");
   const [comment, setComment] = useState("");
   const [isCenter, setisCenter] = useState(false);
-  const [likesProject, setLikesProject] = useState(false);
-  const [priorityLevel, setPriorityLevel] = useState("");
 
   useEffect(() => {
     const loadMap = async () => {
@@ -65,10 +58,8 @@ export default function InteractiveReporterApp() {
         const graphicsLayer = new GraphicsLayer.default();
         view.map.add(graphicsLayer);
 
-        // Zoom controls top-left
         view.ui.add("zoom", "top-left");
 
-        // Static text box on map
         const infoDiv = document.createElement("div");
         infoDiv.innerHTML = "🛈 Use the +/- to zoom. Click and drag to pan.";
         infoDiv.style.padding = "6px 12px";
@@ -80,7 +71,6 @@ export default function InteractiveReporterApp() {
         infoDiv.style.zIndex = 10;
         view.ui.add(infoDiv, "top-right");
 
-        // Sidebar legend
         new Legend({ view, container: legendRef.current });
 
         const sketch = new Sketch.default({
@@ -150,8 +140,6 @@ export default function InteractiveReporterApp() {
         organization,
         submittedcomment: comment,
         is_center: isCenter ? 1 : 0,
-        correct_type: likesProject ? 1 : 0,
-        updated_type: priorityLevel,
         submitted_at: new Date().toISOString(),
         related_feature_id: selectedFeature?.attributes?.OBJECTID || null
       },
@@ -172,10 +160,10 @@ export default function InteractiveReporterApp() {
     setOpen(false);
     setName("");
     setComment("");
-    setLikesProject(false);
-    setPriorityLevel("");
     setSelectedFeature(null);
     setDrawnGeometry(null);
+    setisCenter(false);
+    setOrganization("");
   };
 
   return (
@@ -207,39 +195,8 @@ export default function InteractiveReporterApp() {
             <DialogContent>
               <TextField label="Your Name" fullWidth margin="dense" value={name} onChange={(e) => setName(e.target.value)} />
               <TextField label="Your City/Organization" fullWidth margin="dense" value={organization} onChange={(e) => setOrganization(e.target.value)} />
-              {drawnGeometry ? (
-                <>
-                  <FormControl fullWidth sx={{ mb: 1 }}>
-                    <InputLabel id="center-label">Center Classification</InputLabel>
-                    <Select labelId="center-label" value={priorityLevel} onChange={(e) => setPriorityLevel(e.target.value)}>
-                      <MenuItem value="Metropolitan">Metropolitan</MenuItem>
-                      <MenuItem value="Urban">Urban</MenuItem>
-                      <MenuItem value="City">City</MenuItem>
-                      <MenuItem value="Neighborhood">Neighborhood</MenuItem>
-                    </Select>
-                  </FormControl>
-                  <TextField label="Comment Here (Optional)" fullWidth margin="dense" multiline rows={4} value={comment} onChange={(e) => setComment(e.target.value)} />
-                </>
-              ) : (
-                <>
-                  <FormControlLabel control={<Checkbox checked={isCenter} onChange={(e) => setisCenter(e.target.checked)} />} label="This feature meets the characteristics of a center." />
-                  <FormControlLabel control={<Checkbox checked={likesProject} onChange={(e) => setLikesProject(e.target.checked)} />} label="This center is correctly classified." />
-                  <FormGroup>
-                    <Typography variant="subtitle1" sx={{ fontWeight: "bold" }}>If the center is incorrectly classified, select the correct classification from the options below: </Typography>
-                  </FormGroup>
-                  <FormControl fullWidth margin="dense">
-                    <InputLabel id="center-label">Center Classification</InputLabel>
-                    <Select labelId="center-label" value={priorityLevel} onChange={(e) => setPriorityLevel(e.target.value)}>
-                      <MenuItem value="Metropolitan">Metropolitan</MenuItem>
-                      <MenuItem value="Urban">Urban</MenuItem>
-                      <MenuItem value="City">City</MenuItem>
-                      <MenuItem value="Neighborhood">Neighborhood</MenuItem>
-                      <MenuItem value="NOT A CENTER">This is not a center</MenuItem>
-                    </Select>
-                  </FormControl>
-                  <TextField label="Comment Here (Optional)" fullWidth margin="dense" multiline rows={4} value={comment} onChange={(e) => setComment(e.target.value)} />
-                </>
-              )}
+              <FormControlLabel control={<Checkbox checked={isCenter} onChange={(e) => setisCenter(e.target.checked)} />} label="This feature meets the characteristics of a center." />
+              <TextField label="Comment Here (Optional)" fullWidth margin="dense" multiline rows={4} value={comment} onChange={(e) => setComment(e.target.value)} />
             </DialogContent>
             <DialogActions>
               {drawnGeometry && sketchRef.current && (
