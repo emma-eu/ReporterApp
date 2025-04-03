@@ -55,6 +55,9 @@ export default function InteractiveReporterApp() {
         map: webmap,
         center: [-111.787301, 40.221715],
         zoom: 10.5,
+        ui: {
+          components: ["attribution", "zoom"] // Only show zoom and attribution
+        }
       });
 
       setView(view);
@@ -65,12 +68,8 @@ export default function InteractiveReporterApp() {
 
         const graphicsLayer = new GraphicsLayer.default();
         view.map.add(graphicsLayer);
-          
-      view.when(() => {
-        const legend = new Legend({ view });
-        if (legendRef.current) legend.container = legendRef.current;
-          
-        // Add static text box to the top-left of the map
+
+        // Static text box UI element
         const infoDiv = document.createElement("div");
         infoDiv.innerHTML = "🛈 Use the +/- or two fingers on the screen to zoom. To pan, click and drag the map.";
         infoDiv.style.padding = "6px 12px";
@@ -79,8 +78,8 @@ export default function InteractiveReporterApp() {
         infoDiv.style.borderRadius = "4px";
         infoDiv.style.boxShadow = "0 2px 4px rgba(0,0,0,0.2)";
         infoDiv.style.maxWidth = "220px";
-        view.ui.add(infoDiv, "top-right");
-       });
+        view.ui.add(infoDiv, "top-left");
+
         const sketch = new Sketch.default({
           layer: graphicsLayer,
           view,
