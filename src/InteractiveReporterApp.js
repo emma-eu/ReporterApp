@@ -96,18 +96,24 @@ export default function InteractiveReporterApp() {
         sketch.on("create", (event) => {
           if (event.state === "start") alert("Sketch mode: Click to place vertices. Double-click to finish the shape.");
           if (event.state === "complete") {
-            setDrawnGeometry(event.graphic.geometry);
-            setSelectedFeature(null);
-            setOpen(true);
+            const userGraphic = event.graphic;
+            userGraphic.attributes = { feature_origin: 1 }; // 1 = user-drawn
+            setSelectedFeature(userGraphic); // Will trigger the same popup
+            setDrawnGeometry(userGraphic.geometry);
+            setOpen(false); // Only open on click
           }
         });
 
         view.on("click", async (event) => {
           const response = await view.hitTest(event);
-          const result = response.results.find((r) => r.graphic?.attributes);
+          const result = response.results.find((r) => r.graphic?.geometry);
+
           if (result) {
-            setSelectedFeature(result.graphic);
-            setDrawnGeometry(null);
+            const graphic = result.graphic;
+            const isDrawn = graphic.attributes?.feature_origin === 1;
+
+            setSelectedFeature(graphic);
+            setDrawnGeometry(isDrawn ? graphic.geometry : null);
             setOpen(true);
           }
         });
@@ -169,7 +175,7 @@ export default function InteractiveReporterApp() {
     setPriorityLevel("");
   };
 
-  const isUserCreatedFeature = Boolean(drawnGeometry);
+  const isUserCreatedFeature = selectedFeature?.attributes?.feature_origin === 1;
 
   return (
     <Box display="flex" flexDirection="column" alignItems="center" p={4} pb={2}>
@@ -178,7 +184,7 @@ export default function InteractiveReporterApp() {
           MAG First Draft Centers Map Feedback
         </Typography>
         <Typography variant="h6" gutterBottom>
-          Click on an existing feature to activate the comment form and leave a comment on that feature. You can also click the "ADD A FEATURE" button to draw a new feature on the map. Double-click when you have finished digitizing the new feature and enter your information and comment into the popup that appears at right.
+          Click on an existing feature to activate the comment form and leave a comment on that feature. If the classification for the existing feature is incorrect, select the correct classification. You can also click the "ADD A FEATURE" button to draw a new feature on the map. Double-click when you have finished digitizing the new feature and then select a classification for your proposed center in the form that appears.
         </Typography>
 
         <Box display="flex" gap={2} mb={2}>
@@ -201,7 +207,7 @@ export default function InteractiveReporterApp() {
               <TextField label="Your Name" fullWidth margin="dense" value={name} onChange={(e) => setName(e.target.value)} />
               <TextField label="Your City/Organization" fullWidth margin="dense" value={organization} onChange={(e) => setOrganization(e.target.value)} />
 
-              {isUserCreatedFeature ? (
+              {isUserCreatedFeature && (
                 <>
                   <Typography variant="subtitle1" sx={{ fontWeight: 'bold', fontSize: '1rem', mt: 2 }}>
                     Select a classification for this new center:
@@ -220,27 +226,10 @@ export default function InteractiveReporterApp() {
                     </Select>
                   </FormControl>
                 </>
-              ) : (
-                <>
-                  <FormControlLabel control={<Checkbox checked={isCenter} onChange={(e) => setisCenter(e.target.checked)} />} label="This feature meets the characteristics of a center." />
-                  <Typography variant="subtitle1" sx={{ fontWeight: 'bold', fontSize: '1rem', mt: 2 }}>
-                    If the classification for this center is incorrect in the current map, select the correct classification for this center:
-                  </Typography>
-                  <FormControl fullWidth margin="dense">
-                    <InputLabel>Center Classification</InputLabel>
-                    <Select
-                      value={priorityLevel}
-                      onChange={(e) => setPriorityLevel(e.target.value)}
-                      label="Center Classification"
-                    >
-                      <MenuItem value="Metropolitan">Metropolitan</MenuItem>
-                      <MenuItem value="Urban">Urban</MenuItem>
-                      <MenuItem value="City">City</MenuItem>
-                      <MenuItem value="Neighborhood">Neighborhood</MenuItem>
-                      <MenuItem value="NOT A CENTER">This is not a center</MenuItem>
-                    </Select>
-                  </FormControl>
-                </>
+              )}
+
+              {!isUserCreatedFeature && (
+                <FormControlLabel control={<Checkbox checked={isCenter} onChange={(e) => setisCenter(e.target.checked)} />} label="This feature meets the characteristics of a center." />
               )}
 
               <TextField label="Comment Here (Optional)" fullWidth margin="dense" multiline rows={4} value={comment} onChange={(e) => setComment(e.target.value)} />
@@ -265,4 +254,3 @@ export default function InteractiveReporterApp() {
     </Box>
   );
 }
-
