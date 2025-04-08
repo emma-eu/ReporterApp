@@ -196,7 +196,7 @@ export default function InteractiveReporterApp() {
 
         <Drawer anchor="right" open={open} onClose={() => setOpen(false)}>
           <Box sx={{ width: 360, pt: 2, px: 2, pb: 1 }} role="presentation">
-            <DialogTitle>Feature Feedback</DialogTitle>
+            <DialogTitle>Center Comment Form</DialogTitle>
             <DialogContent>
               <TextField label="Your Name" fullWidth margin="dense" value={name} onChange={(e) => setName(e.target.value)} />
               <TextField label="Your City/Organization" fullWidth margin="dense" value={organization} onChange={(e) => setOrganization(e.target.value)} />
