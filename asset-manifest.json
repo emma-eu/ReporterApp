@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/ReporterApp/static/css/main.b45a2627.css",
-    "main.js": "/ReporterApp/static/js/main.495aa220.js",
+    "main.js": "/ReporterApp/static/js/main.b055c3e3.js",
     "static/js/9453.08b7c272.chunk.js": "/ReporterApp/static/js/9453.08b7c272.chunk.js",
     "static/js/2195.df66415e.chunk.js": "/ReporterApp/static/js/2195.df66415e.chunk.js",
     "static/js/1477.b7b478c6.chunk.js": "/ReporterApp/static/js/1477.b7b478c6.chunk.js",
@@ -559,7 +559,7 @@
     "static/media/SM-Slider_TrackBackground_hover.svg": "/ReporterApp/static/media/SM-Slider_TrackBackground_hover.5dcf34ac7d59f98735ad.svg",
     "static/media/SM-Slider_TrackBackground_idle.svg": "/ReporterApp/static/media/SM-Slider_TrackBackground_idle.cc7bd7014a003ba1844f.svg",
     "main.b45a2627.css.map": "/ReporterApp/static/css/main.b45a2627.css.map",
-    "main.495aa220.js.map": "/ReporterApp/static/js/main.495aa220.js.map",
+    "main.b055c3e3.js.map": "/ReporterApp/static/js/main.b055c3e3.js.map",
     "9453.08b7c272.chunk.js.map": "/ReporterApp/static/js/9453.08b7c272.chunk.js.map",
     "2195.df66415e.chunk.js.map": "/ReporterApp/static/js/2195.df66415e.chunk.js.map",
     "1477.b7b478c6.chunk.js.map": "/ReporterApp/static/js/1477.b7b478c6.chunk.js.map",
@@ -1032,6 +1032,6 @@
   },
   "entrypoints": [
     "static/css/main.b45a2627.css",
-    "static/js/main.495aa220.js"
+    "static/js/main.b055c3e3.js"
   ]
 }
