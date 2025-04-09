@@ -30,8 +30,7 @@ export default function InteractiveReporterApp() {
   const [open, setOpen] = useState(false);
   const [selectedFeature, setSelectedFeature] = useState(null);
   const [drawnGeometry, setDrawnGeometry] = useState(null);
-  const [latestDrawnGraphic, setLatestDrawnGraphic] = useState(null);
-  const [name, setName] = useState("");
+    const [name, setName] = useState("");
   const [organization, setOrganization] = useState("");
   const [comment, setComment] = useState("");
   const [isCenter, setisCenter] = useState(false);
@@ -118,7 +117,6 @@ export default function InteractiveReporterApp() {
             // Open popup immediately after drawing
             setSelectedFeature(userGraphic);
             setDrawnGeometry(userGraphic.geometry);
-            setLatestDrawnGraphic(userGraphic);
             setOpen(true);
           }
         });
@@ -251,7 +249,6 @@ export default function InteractiveReporterApp() {
               <TextField label="Comment Here (Optional)" fullWidth margin="dense" multiline rows={4} value={comment} onChange={(e) => setComment(e.target.value)} />
             </DialogContent>
             <DialogActions>
-              }
               <Button onClick={() => setOpen(false)}>Cancel</Button>
               <Button onClick={handleSubmit} variant="contained" color="primary">Submit Feedback</Button>
             </DialogActions>
