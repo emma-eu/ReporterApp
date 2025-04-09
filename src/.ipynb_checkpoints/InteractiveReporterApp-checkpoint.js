@@ -119,8 +119,6 @@ export default function InteractiveReporterApp() {
             setDrawnGeometry(userGraphic.geometry);
             setOpen(true);
           }
-        }); // Only open on click
-          }
         });
 
         view.on("click", async (event) => {
