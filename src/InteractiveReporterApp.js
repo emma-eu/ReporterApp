@@ -93,6 +93,7 @@ export default function InteractiveReporterApp() {
             preserveAspectRatio: false,
             multipleSelectionEnabled: false
           },
+          polygonSymbol: {
             type: "simple-fill",
             color: [0, 255, 255, 0.3],
             outline: { color: [0, 180, 180, 1], width: 2 }
