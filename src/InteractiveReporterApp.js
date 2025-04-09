@@ -80,12 +80,19 @@ export default function InteractiveReporterApp() {
           layer: graphicsLayer,
           view,
           creationMode: "single",
+          updateOnGraphicClick: true,
           visibleElements: {
             createTools: { point: false, polyline: false, rectangle: false, circle: false },
             selectionTools: { "rectangle-selection": false },
             undoRedoMenu: false
           },
-          polygonSymbol: {
+          defaultUpdateOptions: {
+            tool: "reshape",
+            enableRotation: false,
+            enableScaling: false,
+            preserveAspectRatio: false,
+            multipleSelectionEnabled: false
+          },
             type: "simple-fill",
             color: [0, 255, 255, 0.3],
             outline: { color: [0, 180, 180, 1], width: 2 }
