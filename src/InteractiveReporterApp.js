@@ -203,7 +203,9 @@ export default function InteractiveReporterApp() {
         <Typography variant="h6" gutterBottom>
           Click on an existing feature to activate the comment form and leave a comment on that feature. If the classification for the existing feature is incorrect, select the correct classification.
           <br />
-          You can also click the "ADD A FEATURE" button to draw a new feature on the map. Double-click when you have finished digitizing the new feature and then select a classification for your proposed center in the form that appears. <strong>Please note that your edits or new features will not be saved unless you click the blue SUBMIT FEEDBACK button in the pop-up comment form.</strong>
+          You can also click the "ADD A FEATURE" button to draw a new feature on the map. Double-click when you have finished digitizing the new feature and then select a classification for your proposed center in the form that appears. 
+          <br />
+      <strong>Please note that your edits or new features will not be saved unless you click the blue SUBMIT FEEDBACK button in the pop-up comment form.</strong>
         </Typography>
 
         <Box display="flex" gap={2} mb={2}>
