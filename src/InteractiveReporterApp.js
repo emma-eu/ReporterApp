@@ -251,20 +251,7 @@ export default function InteractiveReporterApp() {
               <TextField label="Comment Here (Optional)" fullWidth margin="dense" multiline rows={4} value={comment} onChange={(e) => setComment(e.target.value)} />
             </DialogContent>
             <DialogActions>
-              {isUserCreatedFeature && selectedFeature && sketchRef.current && (
-                <Button color="error" onClick={() => {
-                  const layer = sketchRef.current.layer;
-                  const graphicToRemove = latestDrawnGraphic;
-                  if (graphicToRemove) {
-                    layer.remove(graphicToRemove);
-                  }
-                  setSelectedFeature(null);
-                  setDrawnGeometry(null);
-                  setOpen(false);
-                }}>
-                  Delete Feature
-                </Button>
-              )}
+              }
               <Button onClick={() => setOpen(false)}>Cancel</Button>
               <Button onClick={handleSubmit} variant="contained" color="primary">Submit Feedback</Button>
             </DialogActions>
