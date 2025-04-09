@@ -252,7 +252,10 @@ export default function InteractiveReporterApp() {
               {isUserCreatedFeature && selectedFeature && sketchRef.current && (
                 <Button color="error" onClick={() => {
                   const layer = sketchRef.current.layer;
-                  const graphicToRemove = layer.graphics.find(g => g === selectedFeature);
+                  const graphicToRemove = layer.graphics.find(g =>
+  g.geometry && selectedFeature?.geometry &&
+  g.geometry.toJSON().rings?.toString() === selectedFeature.geometry.toJSON().rings?.toString()
+);
                   if (graphicToRemove) {
                     layer.remove(graphicToRemove);
                   }
