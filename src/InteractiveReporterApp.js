@@ -164,7 +164,7 @@ export default function InteractiveReporterApp() {
         organization,
         submittedcomment: comment,
         is_center: isCenter ? 1 : 0,
-        correct_type: priorityLevel,
+        priority_level: priorityLevel,
         submitted_at: new Date().toISOString(),
         related_feature_id: selectedFeature?.attributes?.OBJECTID || null
       },
