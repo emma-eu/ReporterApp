@@ -80,7 +80,7 @@ export default function InteractiveReporterApp() {
           layer: graphicsLayer,
           view,
           creationMode: "single",
-          updateOnGraphicClick: true,
+          updateOnGraphicClick: false,
           visibleElements: {
             createTools: { point: false, polyline: false, rectangle: false, circle: false },
             selectionTools: { "rectangle-selection": false },
@@ -103,13 +103,23 @@ export default function InteractiveReporterApp() {
         sketchRef.current = sketch;
 
         sketch.on("create", (event) => {
-          if (event.state === "start") alert("Sketch mode: Click to place vertices. Double-click to finish the shape.");
+          if (event.state === "start") {
+            alert("Sketch mode: Click to place vertices. Double-click to finish the shape.");
+          }
           if (event.state === "complete") {
             const userGraphic = event.graphic;
-            userGraphic.attributes = { feature_origin: 1 }; // 1 = user-drawn
+            userGraphic.attributes = { feature_origin: 1 };
+            graphicsLayer.add(userGraphic); // Ensure it's added to the map
+
+            // Stop drawing mode after placing one shape
+            sketch.cancel();
+
+            // Open popup immediately after drawing
             setSelectedFeature(userGraphic);
             setDrawnGeometry(userGraphic.geometry);
-            setOpen(false); // Only open on click
+            setOpen(true);
+          }
+        }); // Only open on click
           }
         });
 
@@ -151,7 +161,7 @@ export default function InteractiveReporterApp() {
     const newFeature = {
       geometry,
       attributes: {
-        feature_origin: selectedFeature?.attributes?.OBJECTID == null ? 1 : 0,
+        feature_origin: selectedFeature?.attributes?.feature_origin === 1 ? 1 : 0,
         name,
         organization,
         submittedcomment: comment,
