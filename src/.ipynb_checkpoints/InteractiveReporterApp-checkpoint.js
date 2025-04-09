@@ -30,6 +30,7 @@ export default function InteractiveReporterApp() {
   const [open, setOpen] = useState(false);
   const [selectedFeature, setSelectedFeature] = useState(null);
   const [drawnGeometry, setDrawnGeometry] = useState(null);
+  const [latestDrawnGraphic, setLatestDrawnGraphic] = useState(null);
   const [name, setName] = useState("");
   const [organization, setOrganization] = useState("");
   const [comment, setComment] = useState("");
@@ -117,6 +118,7 @@ export default function InteractiveReporterApp() {
             // Open popup immediately after drawing
             setSelectedFeature(userGraphic);
             setDrawnGeometry(userGraphic.geometry);
+            setLatestDrawnGraphic(userGraphic);
             setOpen(true);
           }
         });
@@ -201,7 +203,7 @@ export default function InteractiveReporterApp() {
           MAG First Draft Centers Map Feedback
         </Typography>
         <Typography variant="h6" gutterBottom>
-          Click on an existing feature to activate the comment form and leave a comment on that feature. If the classification for the existing feature is incorrect, select the correct classification. You can also click the "ADD A FEATURE" button to draw a new feature on the map. Double-click when you have finished digitizing the new feature and then select a classification for your proposed center in the form that appears.
+          Click on an existing feature to activate the comment form and leave a comment on that feature. If the classification for the existing feature is incorrect, select the correct classification. You can also click the "ADD A FEATURE" button to draw a new feature on the map. Double-click when you have finished digitizing the new feature and then select a classification for your proposed center in the form that appears. Please note that your edits or new features will not be saved unless you click the blue SUBMIT button in the pop-up comment form.
         </Typography>
 
         <Box display="flex" gap={2} mb={2}>
@@ -252,10 +254,7 @@ export default function InteractiveReporterApp() {
               {isUserCreatedFeature && selectedFeature && sketchRef.current && (
                 <Button color="error" onClick={() => {
                   const layer = sketchRef.current.layer;
-                  const graphicToRemove = layer.graphics.find(g =>
-  g.geometry && selectedFeature?.geometry &&
-  g.geometry.toJSON().rings?.toString() === selectedFeature.geometry.toJSON().rings?.toString()
-);
+                  const graphicToRemove = latestDrawnGraphic;
                   if (graphicToRemove) {
                     layer.remove(graphicToRemove);
                   }
