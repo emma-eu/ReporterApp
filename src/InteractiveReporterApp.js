@@ -235,7 +235,7 @@ export default function InteractiveReporterApp() {
               <TextField label="Your City/Organization" fullWidth margin="dense" value={organization} onChange={(e) => setOrganization(e.target.value)} />
 
               <Typography variant="subtitle1" sx={{ fontWeight: 'bold', fontSize: '1rem', mt: 2 }}>
-                Select a more accurate classification (if different) OR if this is a feature you created, select its classification:
+                Select a more accurate classification for an existing center OR if this is a feature you created, select its classification:
               </Typography>
               <FormControl fullWidth margin="dense">
                 <InputLabel>Center Classification</InputLabel>
