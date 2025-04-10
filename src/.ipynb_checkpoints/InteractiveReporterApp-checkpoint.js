@@ -25,16 +25,14 @@ export default function InteractiveReporterApp() {
   const mapRef = useRef(null);
   const legendRef = useRef(null);
   const sketchRef = useRef(null);
-  const [, setView] = useState(null);
-  const [editingGraphic, setEditingGraphic] = useState(null);
+    const [editingGraphic, setEditingGraphic] = useState(null);
 
   const [open, setOpen] = useState(false);
-  const [selectedFeature, setSelectedFeature] = useState(null);
-  const [drawnGeometry, setDrawnGeometry] = useState(null);
+    const [drawnGeometry, setDrawnGeometry] = useState(null);
   const [name, setName] = useState("");
   const [organization, setOrganization] = useState("");
   const [comment, setComment] = useState("");
-  const [isCenter, setisCenter] = useState(false);
+  const [isCenter, setIsCenter] = useState(false);
   const [priorityLevel, setPriorityLevel] = useState("");
 
   useEffect(() => {
@@ -192,15 +190,16 @@ export default function InteractiveReporterApp() {
     
     setName("");
     setComment("");
-    setSelectedFeature(null);
-                setDrawnGeometry(null);
+                    setDrawnGeometry(null);
     if (
       sketchRef.current &&
       editingGraphic &&
       sketchRef.current.layer.graphics.includes(editingGraphic)
     ) {
-      sketchRef.current.layer.remove(editingGraphic);
-      sketchRef.current.reset();
+      sketchRef.current.cancel();
+                  sketchRef.current.cancel();
+                  sketchRef.current.layer.remove(editingGraphic);
+                  sketchRef.current.reset();
     }
     setEditingGraphic(null);
     setisCenter(false);
@@ -255,7 +254,7 @@ export default function InteractiveReporterApp() {
               </FormControl>
 
               {!isUserCreatedFeature && (
-                <FormControlLabel control={<Checkbox checked={isCenter} onChange={(e) => setisCenter(e.target.checked)} />} label="This feature meets the characteristics of a center." />
+                <FormControlLabel control={<Checkbox checked={isCenter} onChange={(e) => setIsCenter(e.target.checked)} />} label="This feature meets the characteristics of a center." />
               )}
 
               <TextField label="Comment Here (Optional)" fullWidth margin="dense" multiline rows={4} value={comment} onChange={(e) => setComment(e.target.value)} />
