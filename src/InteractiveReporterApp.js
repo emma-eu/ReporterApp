@@ -252,7 +252,12 @@ export default function InteractiveReporterApp() {
               <TextField label="Comment Here (Optional)" fullWidth margin="dense" multiline rows={4} value={comment} onChange={(e) => setComment(e.target.value)} />
             </DialogContent>
             <DialogActions>
-              <Button onClick={() => setOpen(false)}>Cancel</Button>
+              <Button onClick={() => {
+                setOpen(false);
+                if (sketchRef.current && selectedFeature) {
+                  sketchRef.current.layer.remove(selectedFeature);
+                }
+              }}>Cancel</Button>
               <Button onClick={handleSubmit} variant="contained" color="primary">Submit Feedback</Button>
             </DialogActions>
           </Box>
