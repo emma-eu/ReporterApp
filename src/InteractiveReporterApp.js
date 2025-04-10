@@ -267,6 +267,9 @@ export default function InteractiveReporterApp() {
                 }
                 setSelectedFeature(null);
                 setDrawnGeometry(null);
+                if (sketchRef.current) {
+                  sketchRef.current.cancel();
+                }
               }}>Cancel</Button>
               <Button onClick={handleSubmit} variant="contained" color="primary">Submit Feedback</Button>
             </DialogActions>
