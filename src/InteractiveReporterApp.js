@@ -26,6 +26,7 @@ export default function InteractiveReporterApp() {
   const legendRef = useRef(null);
   const sketchRef = useRef(null);
   const [, setView] = useState(null);
+  const [editingGraphic, setEditingGraphic] = useState(null);
 
   const [open, setOpen] = useState(false);
   const [selectedFeature, setSelectedFeature] = useState(null);
@@ -115,6 +116,7 @@ export default function InteractiveReporterApp() {
             sketch.update([userGraphic], {
               tool: "reshape"
             });
+            setEditingGraphic(userGraphic);
 
             setSelectedFeature(userGraphic);
             setDrawnGeometry(userGraphic.geometry);
@@ -187,17 +189,20 @@ export default function InteractiveReporterApp() {
     }
 
     setOpen(false);
-    if (sketchRef.current && selectedFeature?.attributes?.feature_origin === 1) {
-                  sketchRef.current.layer.remove(selectedFeature);
-                }
+    
     setName("");
     setComment("");
     setSelectedFeature(null);
                 setDrawnGeometry(null);
-
-                if (sketchRef.current) {
-                  sketchRef.current.reset();
-                }
+    if (
+      sketchRef.current &&
+      editingGraphic &&
+      sketchRef.current.layer.graphics.includes(editingGraphic)
+    ) {
+      sketchRef.current.layer.remove(editingGraphic);
+      sketchRef.current.reset();
+    }
+    setEditingGraphic(null);
     setisCenter(false);
     setOrganization("");
     setPriorityLevel("");
@@ -258,18 +263,18 @@ export default function InteractiveReporterApp() {
             <DialogActions>
               <Button onClick={() => {
                 setOpen(false);
-                if (
-                  sketchRef.current &&
-                  selectedFeature?.attributes?.feature_origin === 1 &&
-                  sketchRef.current.layer.graphics.includes(selectedFeature)
-                ) {
-                  sketchRef.current.layer.remove(selectedFeature);
-                }
+                
                 setSelectedFeature(null);
                 setDrawnGeometry(null);
-                if (sketchRef.current) {
-                  sketchRef.current.cancel();
+                if (
+                  sketchRef.current &&
+                  editingGraphic &&
+                  sketchRef.current.layer.graphics.includes(editingGraphic)
+                ) {
+                  sketchRef.current.layer.remove(editingGraphic);
+                  sketchRef.current.reset();
                 }
+                setEditingGraphic(null);
               }}>Cancel</Button>
               <Button onClick={handleSubmit} variant="contained" color="primary">Submit Feedback</Button>
             </DialogActions>
