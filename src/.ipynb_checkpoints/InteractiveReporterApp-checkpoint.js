@@ -19,6 +19,7 @@ import InputLabel from "@mui/material/InputLabel";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import Legend from "@arcgis/core/widgets/Legend";
+import Graphic from "@arcgis/core/Graphic";
 import "@arcgis/core/assets/esri/themes/light/main.css";
 
 export default function InteractiveReporterApp() {
@@ -109,13 +110,7 @@ export default function InteractiveReporterApp() {
           if (event.state === "complete") {
             const userGraphic = event.graphic;
             userGraphic.attributes = { feature_origin: 1 };
-            // Removed this line to prevent duplicate graphics and allow sketch removal
-
-            // Allow users to continue editing their shape
-            sketch.update([userGraphic], {
-              tool: "reshape"
-            });
-
+            sketch.update([userGraphic], { tool: "reshape" });
             setSelectedFeature(userGraphic);
             setDrawnGeometry(userGraphic.geometry);
             setOpen(true);
@@ -123,37 +118,42 @@ export default function InteractiveReporterApp() {
         });
 
         view.on("click", async (event) => {
+          if (open && sketchRef.current?.update) {
+            sketchRef.current.update([], { tool: "reshape" });
+          }
           const response = await view.hitTest(event);
           const result = response.results.find((r) => r.graphic?.geometry);
-
           if (result) {
             const graphic = result.graphic;
             const isDrawn = graphic.attributes?.feature_origin === 1;
-
             if (isDrawn) {
               setSelectedFeature(graphic);
               setDrawnGeometry(graphic.geometry);
               setOpen(true);
             } else {
               const clonedGeometry = graphic.geometry.clone();
-              const commentGraphic = {
+              const commentGraphic = new Graphic({
                 geometry: clonedGeometry,
                 attributes: {
                   feature_origin: 0,
                   OBJECTID: graphic.attributes?.OBJECTID
                 }
-              };
+              });
               setSelectedFeature(commentGraphic);
               setDrawnGeometry(clonedGeometry);
               setOpen(true);
             }
+          } else {
+            setOpen(false);
+            setSelectedFeature(null);
+            setDrawnGeometry(null);
           }
         });
       });
     };
 
     loadMap();
-  }, []);
+  }, [open]);
 
   const startDrawing = () => {
     if (sketchRef.current) sketchRef.current.create("polygon");
@@ -199,8 +199,8 @@ export default function InteractiveReporterApp() {
 
     setOpen(false);
     if (sketchRef.current && selectedFeature?.attributes?.feature_origin === 1) {
-                  sketchRef.current.layer.remove(selectedFeature);
-                }
+      sketchRef.current.layer.remove(selectedFeature);
+    }
     setName("");
     setComment("");
     setSelectedFeature(null);
@@ -211,19 +211,14 @@ export default function InteractiveReporterApp() {
   };
 
   const isUserCreatedFeature = selectedFeature?.attributes?.feature_origin === 1;
-    const handleDeleteSketch = () => {
-  if (
-    selectedFeature &&
-    selectedFeature.attributes?.feature_origin === 1 &&
-    !selectedFeature.attributes?.OBJECTID &&
-    sketchRef.current
-  ) {
-    sketchRef.current.layer.remove(selectedFeature);
-  }
-  setOpen(false);
-  setSelectedFeature(null);
-  setDrawnGeometry(null);
-};
+  const handleDeleteSketch = () => {
+    if (isUserCreatedFeature && !selectedFeature?.attributes?.OBJECTID && sketchRef.current) {
+      sketchRef.current.layer.remove(selectedFeature);
+    }
+    setOpen(false);
+    setSelectedFeature(null);
+    setDrawnGeometry(null);
+  };
 
   return (
     <Box display="flex" flexDirection="column" alignItems="center" p={4} pb={2}>
@@ -276,18 +271,9 @@ export default function InteractiveReporterApp() {
               <TextField label="Comment Here (Optional)" fullWidth margin="dense" multiline rows={4} value={comment} onChange={(e) => setComment(e.target.value)} />
             </DialogContent>
             <DialogActions>
-              <Button onClick={handleDeleteSketch} color="secondary">
-                DELETE SKETCH
-              </Button>
+              {isUserCreatedFeature && <Button onClick={handleDeleteSketch} color="secondary">DELETE SKETCH</Button>}
               <Button onClick={() => {
                 setOpen(false);
-                if (
-                  sketchRef.current &&
-                  selectedFeature?.attributes?.feature_origin === 1 &&
-                  sketchRef.current.layer.graphics.includes(selectedFeature)
-                ) {
-                  sketchRef.current.layer.remove(selectedFeature);
-                }
                 setSelectedFeature(null);
                 setDrawnGeometry(null);
               }}>Cancel</Button>
