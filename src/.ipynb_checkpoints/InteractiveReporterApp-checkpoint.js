@@ -30,7 +30,7 @@ export default function InteractiveReporterApp() {
   const [open, setOpen] = useState(false);
   const [selectedFeature, setSelectedFeature] = useState(null);
   const [drawnGeometry, setDrawnGeometry] = useState(null);
-    const [name, setName] = useState("");
+  const [name, setName] = useState("");
   const [organization, setOrganization] = useState("");
   const [comment, setComment] = useState("");
   const [isCenter, setisCenter] = useState(false);
@@ -109,12 +109,13 @@ export default function InteractiveReporterApp() {
           if (event.state === "complete") {
             const userGraphic = event.graphic;
             userGraphic.attributes = { feature_origin: 1 };
-            graphicsLayer.add(userGraphic); // Ensure it's added to the map
+            graphicsLayer.add(userGraphic);
 
-            // Stop drawing mode after placing one shape
-            sketch.cancel();
+            // Allow users to continue editing their shape
+            sketch.update([userGraphic], {
+              tool: "reshape"
+            });
 
-            // Open popup immediately after drawing
             setSelectedFeature(userGraphic);
             setDrawnGeometry(userGraphic.geometry);
             setOpen(true);
@@ -129,9 +130,12 @@ export default function InteractiveReporterApp() {
             const graphic = result.graphic;
             const isDrawn = graphic.attributes?.feature_origin === 1;
 
-            setSelectedFeature(graphic);
-            setDrawnGeometry(isDrawn ? graphic.geometry : null);
-            setOpen(true);
+            // Only open popup for user-drawn features
+            if (isDrawn) {
+              setSelectedFeature(graphic);
+              setDrawnGeometry(graphic.geometry);
+              setOpen(true);
+            }
           }
         });
       });
