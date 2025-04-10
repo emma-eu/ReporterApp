@@ -1,3 +1,5 @@
+// NOTE: This update ensures the layout mirrors the OpenSpaceFeedbackReporter app: static textbox, zoom top-left, and sidebar legend — with extra tools removed.
+
 import { useEffect, useRef, useState } from "react";
 // Material UI components for layout and UI
 import Card from "@mui/material/Card";
@@ -17,11 +19,6 @@ import InputLabel from "@mui/material/InputLabel";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import Legend from "@arcgis/core/widgets/Legend";
-import FeatureLayer from "@arcgis/core/layers/FeatureLayer";
-import MapView from "@arcgis/core/views/MapView";
-import WebMap from "@arcgis/core/WebMap";
-import Sketch from "@arcgis/core/widgets/Sketch";
-import GraphicsLayer from "@arcgis/core/layers/GraphicsLayer";
 import "@arcgis/core/assets/esri/themes/light/main.css";
 
 export default function InteractiveReporterApp() {
@@ -33,14 +30,26 @@ export default function InteractiveReporterApp() {
   const [open, setOpen] = useState(false);
   const [selectedFeature, setSelectedFeature] = useState(null);
   const [drawnGeometry, setDrawnGeometry] = useState(null);
+  const [name, setName] = useState("");
+  const [organization, setOrganization] = useState("");
+  const [comment, setComment] = useState("");
+  const [isCenter, setisCenter] = useState(false);
+  const [priorityLevel, setPriorityLevel] = useState("");
 
   useEffect(() => {
     const loadMap = async () => {
-      const webmap = new WebMap({
+      const [MapView, WebMap, Sketch, GraphicsLayer] = await Promise.all([
+        import("@arcgis/core/views/MapView"),
+        import("@arcgis/core/WebMap"),
+        import("@arcgis/core/widgets/Sketch"),
+        import("@arcgis/core/layers/GraphicsLayer")
+      ]);
+
+      const webmap = new WebMap.default({
         portalItem: { id: "193de866247a4946a17331d2fdefc294" },
       });
 
-      const view = new MapView({
+      const view = new MapView.default({
         container: mapRef.current,
         map: webmap,
         center: [-111.787301, 40.221715],
@@ -52,7 +61,7 @@ export default function InteractiveReporterApp() {
 
       view.when(async () => {
         view.popup.autoOpenEnabled = false;
-        const graphicsLayer = new GraphicsLayer({ popupEnabled: false });
+        const graphicsLayer = new GraphicsLayer.default({ popupEnabled: false });
         view.map.add(graphicsLayer);
 
         const infoDiv = document.createElement("div");
@@ -67,7 +76,7 @@ export default function InteractiveReporterApp() {
 
         new Legend({ view, container: legendRef.current });
 
-        const sketch = new Sketch({
+        const sketch = new Sketch.default({
           layer: graphicsLayer,
           view,
           creationMode: "single",
@@ -75,17 +84,38 @@ export default function InteractiveReporterApp() {
           visibleElements: {
             createTools: { point: false, polyline: false, rectangle: false, circle: false },
             selectionTools: { "rectangle-selection": false },
-            undoRedoMenu: false,
+            undoRedoMenu: false
           },
+          defaultUpdateOptions: {
+            tool: "reshape",
+            enableRotation: false,
+            enableScaling: false,
+            preserveAspectRatio: false,
+            multipleSelectionEnabled: false
+          },
+          polygonSymbol: {
+            type: "simple-fill",
+            color: [0, 255, 255, 0.3],
+            outline: { color: [0, 180, 180, 1], width: 2 }
+          }
         });
 
         sketchRef.current = sketch;
 
         sketch.on("create", (event) => {
+          if (event.state === "start") {
+            alert("Sketch mode: Click to place vertices. Double-click to finish the shape.");
+          }
           if (event.state === "complete") {
             const userGraphic = event.graphic;
             userGraphic.attributes = { feature_origin: 1 };
             graphicsLayer.add(userGraphic);
+
+            // Allow users to continue editing their shape
+            sketch.update([userGraphic], {
+              tool: "reshape"
+            });
+
             setSelectedFeature(userGraphic);
             setDrawnGeometry(userGraphic.geometry);
             setOpen(true);
@@ -96,10 +126,16 @@ export default function InteractiveReporterApp() {
           const response = await view.hitTest(event);
           const result = response.results.find((r) => r.graphic?.geometry);
 
-          if (result && result.graphic.attributes?.feature_origin === 1) {
-            setSelectedFeature(result.graphic);
-            setDrawnGeometry(result.graphic.geometry);
-            setOpen(true);
+          if (result) {
+            const graphic = result.graphic;
+            const isDrawn = graphic.attributes?.feature_origin === 1;
+
+            // Only open popup for user-drawn features
+            if (isDrawn) {
+              setSelectedFeature(graphic);
+              setDrawnGeometry(graphic.geometry);
+              setOpen(true);
+            }
           }
         });
       });
@@ -108,27 +144,147 @@ export default function InteractiveReporterApp() {
     loadMap();
   }, []);
 
-  const handleDeleteSketch = () => {
-    if (selectedFeature && selectedFeature.attributes?.feature_origin === 1 && sketchRef.current) {
-      sketchRef.current.layer.remove(selectedFeature);
-    }
-    setOpen(false);
-    setSelectedFeature(null);
-    setDrawnGeometry(null);
+  const startDrawing = () => {
+    if (sketchRef.current) sketchRef.current.create("polygon");
   };
 
+  const handleSubmit = async () => {
+    const [FeatureLayer] = await Promise.all([
+      import("@arcgis/core/layers/FeatureLayer")
+    ]);
+
+    const responseLayer = new FeatureLayer.default({
+      url: "https://services6.arcgis.com/MLUVmF7LMfvzoHjV/arcgis/rest/services/CenterResponses/FeatureServer/0",
+    });
+
+    const geometry = selectedFeature?.geometry || drawnGeometry;
+    if (!geometry) return;
+
+    const newFeature = {
+      geometry,
+      attributes: {
+        feature_origin: selectedFeature?.attributes?.feature_origin === 1 ? 1 : 0,
+        name,
+        organization,
+        submittedcomment: comment,
+        is_center: isCenter ? 1 : 0,
+        priority_level: priorityLevel,
+        submitted_at: new Date().toISOString(),
+        related_feature_id: selectedFeature?.attributes?.OBJECTID || null
+      },
+    };
+
+    try {
+      const result = await responseLayer.applyEdits({ addFeatures: [newFeature] });
+      if (result.addFeatureResults.length > 0 && !result.addFeatureResults[0].error) {
+        alert("Feature submitted successfully!");
+      } else {
+        alert("Submission failed.");
+        console.error(result);
+      }
+    } catch (error) {
+      console.error("Error submitting feature:", error);
+    }
+
+    setOpen(false);
+    if (sketchRef.current && selectedFeature?.attributes?.feature_origin === 1) {
+                  sketchRef.current.layer.remove(selectedFeature);
+                }
+    setName("");
+    setComment("");
+    setSelectedFeature(null);
+    setDrawnGeometry(null);
+    setisCenter(false);
+    setOrganization("");
+    setPriorityLevel("");
+  };
+
+  const isUserCreatedFeature = selectedFeature?.attributes?.feature_origin === 1;
+    const handleDeleteSketch = () => {
+  if (
+    selectedFeature &&
+    selectedFeature.attributes?.feature_origin === 1 &&
+    !selectedFeature.attributes?.OBJECTID &&
+    sketchRef.current
+  ) {
+    sketchRef.current.layer.remove(selectedFeature);
+  }
+  setOpen(false);
+  setSelectedFeature(null);
+  setDrawnGeometry(null);
+};
+
   return (
-    <Box>
-      <div ref={mapRef} style={{ height: "100vh", width: "100%" }} />
-      <div ref={legendRef} style={{ position: "absolute", top: 10, right: 10 }} />
-      <Drawer anchor="right" open={open} onClose={() => setOpen(false)}>
-        <Box sx={{ width: 360, pt: 2, px: 2, pb: 1 }}>
-          <DialogActions>
-            <Button onClick={handleDeleteSketch} color="secondary">DELETE SKETCH</Button>
-            <Button onClick={() => setOpen(false)}>Cancel</Button>
-          </DialogActions>
+    <Box display="flex" flexDirection="column" alignItems="center" p={4} pb={2}>
+      <Box width="100%" maxWidth="1250px">
+        <Typography variant="h4" gutterBottom>
+          MAG First Draft Centers Map Feedback
+        </Typography>
+        <Box display="flex" gap={2} mb={2}>
+          <Button variant="contained" color="primary" onClick={startDrawing}>
+            Add A Feature
+          </Button>
         </Box>
-      </Drawer>
+
+        <Card sx={{ my: 2, mb: 1 }}>
+          <CardContent sx={{ height: 450, display: 'flex', position: 'relative' }}>
+            <div ref={mapRef} style={{ width: "80%", height: "100%", borderRadius: 2, position: "relative" }} />
+            <div ref={legendRef} style={{ width: "20%", minWidth: 200, paddingLeft: 10, overflowY: "auto" }} />
+          </CardContent>
+        </Card>
+
+        <Drawer anchor="right" open={open} onClose={() => setOpen(false)}>
+          <Box sx={{ width: 360, pt: 2, px: 2, pb: 1 }} role="presentation">
+            <DialogTitle>Center Comment Form</DialogTitle>
+            <DialogContent>
+              <TextField label="Your Name" fullWidth margin="dense" value={name} onChange={(e) => setName(e.target.value)} />
+              <TextField label="Your City/Organization" fullWidth margin="dense" value={organization} onChange={(e) => setOrganization(e.target.value)} />
+
+              <Typography variant="subtitle1" sx={{ fontWeight: 'bold', fontSize: '1rem', mt: 2 }}>
+                Select a more accurate classification for an existing center OR if this is a feature you created, select its classification:
+              </Typography>
+              <FormControl fullWidth margin="dense">
+                <InputLabel>Center Classification</InputLabel>
+                <Select
+                  value={priorityLevel}
+                  onChange={(e) => setPriorityLevel(e.target.value)}
+                  label="Center Classification"
+                >
+                  <MenuItem value="Metropolitan">Metropolitan</MenuItem>
+                  <MenuItem value="Urban">Urban</MenuItem>
+                  <MenuItem value="City">City</MenuItem>
+                  <MenuItem value="Neighborhood">Neighborhood</MenuItem>
+                  {!isUserCreatedFeature && <MenuItem value="NOT A CENTER">This is not a center</MenuItem>}
+                </Select>
+              </FormControl>
+
+              {!isUserCreatedFeature && (
+                <FormControlLabel control={<Checkbox checked={isCenter} onChange={(e) => setisCenter(e.target.checked)} />} label="This feature meets the characteristics of a center." />
+              )}
+
+              <TextField label="Comment Here (Optional)" fullWidth margin="dense" multiline rows={4} value={comment} onChange={(e) => setComment(e.target.value)} />
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={handleDeleteSketch} color="secondary">
+                DELETE SKETCH
+              </Button>
+              <Button onClick={() => {
+                setOpen(false);
+                if (
+                  sketchRef.current &&
+                  selectedFeature?.attributes?.feature_origin === 1 &&
+                  sketchRef.current.layer.graphics.includes(selectedFeature)
+                ) {
+                  sketchRef.current.layer.remove(selectedFeature);
+                }
+                setSelectedFeature(null);
+                setDrawnGeometry(null);
+              }}>Cancel</Button>
+              <Button onClick={handleSubmit} variant="contained" color="primary">Submit Feedback</Button>
+            </DialogActions>
+          </Box>
+        </Drawer>
+      </Box>
     </Box>
   );
 }
