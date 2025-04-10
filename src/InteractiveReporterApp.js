@@ -187,9 +187,9 @@ export default function InteractiveReporterApp() {
     }
 
     setOpen(false);
-    if (sketchRef.current && selectedFeature) {
-      sketchRef.current.layer.remove(selectedFeature);
-    }
+    if (sketchRef.current && selectedFeature?.attributes?.feature_origin === 1) {
+                  sketchRef.current.layer.remove(selectedFeature);
+                }
     setName("");
     setComment("");
     setSelectedFeature(null);
@@ -254,9 +254,15 @@ export default function InteractiveReporterApp() {
             <DialogActions>
               <Button onClick={() => {
                 setOpen(false);
-                if (sketchRef.current && selectedFeature) {
+                if (
+                  sketchRef.current &&
+                  selectedFeature?.attributes?.feature_origin === 1 &&
+                  sketchRef.current.layer.graphics.includes(selectedFeature)
+                ) {
                   sketchRef.current.layer.remove(selectedFeature);
                 }
+                setSelectedFeature(null);
+                setDrawnGeometry(null);
               }}>Cancel</Button>
               <Button onClick={handleSubmit} variant="contained" color="primary">Submit Feedback</Button>
             </DialogActions>
