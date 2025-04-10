@@ -28,8 +28,7 @@ export default function InteractiveReporterApp() {
     const [editingGraphic, setEditingGraphic] = useState(null);
 
   const [open, setOpen] = useState(false);
-    const [drawnGeometry, setDrawnGeometry] = useState(null);
-  const [name, setName] = useState("");
+      const [name, setName] = useState("");
   const [organization, setOrganization] = useState("");
   const [comment, setComment] = useState("");
   const [isCenter, setIsCenter] = useState(false);
@@ -117,8 +116,7 @@ export default function InteractiveReporterApp() {
             setEditingGraphic(userGraphic);
 
             
-            setDrawnGeometry(userGraphic.geometry);
-            setOpen(true);
+                        setOpen(true);
           }
         });
 
@@ -133,8 +131,7 @@ export default function InteractiveReporterApp() {
             // Only open popup for user-drawn features
             if (isDrawn) {
               
-              setDrawnGeometry(graphic.geometry);
-              setOpen(true);
+                            setOpen(true);
             }
           }
         });
@@ -148,6 +145,20 @@ export default function InteractiveReporterApp() {
     if (sketchRef.current) sketchRef.current.create("polygon");
   };
 
+  
+
+const cleanUpSketch = () => {
+  if (
+    sketchRef.current &&
+    editingGraphic &&
+    sketchRef.current.layer.graphics.includes(editingGraphic)
+  ) {
+    sketchRef.current.cancel();
+    sketchRef.current.reset();
+    sketchRef.current.layer.remove(editingGraphic);
+  }
+  setEditingGraphic(null);
+};
   const handleSubmit = async () => {
     const [FeatureLayer] = await Promise.all([
       import("@arcgis/core/layers/FeatureLayer")
@@ -157,7 +168,7 @@ export default function InteractiveReporterApp() {
       url: "https://services6.arcgis.com/MLUVmF7LMfvzoHjV/arcgis/rest/services/CenterResponses/FeatureServer/0",
     });
 
-    const geometry = editingGraphic?.geometry || drawnGeometry;
+    const geometry = editingGraphic?.geometry;
     if (!geometry) return;
 
     const newFeature = {
@@ -186,21 +197,11 @@ export default function InteractiveReporterApp() {
       console.error("Error submitting feature:", error);
     }
 
+    cleanUpSketch();
+    // Drawer will close after cleaning up
     setOpen(false);
-    
     setName("");
     setComment("");
-                    setDrawnGeometry(null);
-    if (
-      sketchRef.current &&
-      editingGraphic &&
-      sketchRef.current.layer.graphics.includes(editingGraphic)
-    ) {
-      sketchRef.current.cancel();
-      sketchRef.current.reset();
-      sketchRef.current.layer.remove(editingGraphic);
-    }
-    setEditingGraphic(null);
     setIsCenter(false);
     setOrganization("");
     setPriorityLevel("");
@@ -260,20 +261,16 @@ export default function InteractiveReporterApp() {
             </DialogContent>
             <DialogActions>
               <Button onClick={() => {
-                setOpen(false);
-                
-                                setDrawnGeometry(null);
-                if (
-                  sketchRef.current &&
-                  editingGraphic &&
-                  sketchRef.current.layer.graphics.includes(editingGraphic)
-                ) {
-                  sketchRef.current.cancel();
-                  sketchRef.current.reset();
-                  sketchRef.current.layer.remove(editingGraphic);
-                }
-                setEditingGraphic(null);
-              }}>Cancel</Button>
+      cleanUpSketch();
+      setOpen(false);
+      setName("");
+      setComment("");
+      setIsCenter(false);
+      setOrganization("");
+      setPriorityLevel("");
+    }}>
+      Cancel
+    </Button>
               <Button onClick={handleSubmit} variant="contained" color="primary">Submit Feedback</Button>
             </DialogActions>
           </Box>
