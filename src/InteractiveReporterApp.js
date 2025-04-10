@@ -196,7 +196,7 @@ export default function InteractiveReporterApp() {
                 setDrawnGeometry(null);
 
                 if (sketchRef.current) {
-                  sketchRef.current.cancel();
+                  sketchRef.current.reset();
                 }
     setisCenter(false);
     setOrganization("");
