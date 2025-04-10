@@ -187,6 +187,9 @@ export default function InteractiveReporterApp() {
     }
 
     setOpen(false);
+    if (sketchRef.current && selectedFeature) {
+      sketchRef.current.layer.remove(selectedFeature);
+    }
     setName("");
     setComment("");
     setSelectedFeature(null);
