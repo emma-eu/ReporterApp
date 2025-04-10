@@ -124,11 +124,11 @@ export default function InteractiveReporterApp() {
             const graphic = result.graphic;
             const isDrawn = graphic.attributes?.feature_origin === 1;
             if (isDrawn) {
+              sketchRef.current.complete();
               setSelectedFeature(graphic);
               setDrawnGeometry(graphic.geometry);
-              setOpen(true);
-              sketchRef.current.complete();
               sketchRef.current.update([graphic], { tool: "reshape" });
+              setOpen(true);
             } else {
               const clonedGeometry = graphic.geometry.clone();
               const commentGraphic = new Graphic({
@@ -143,9 +143,7 @@ export default function InteractiveReporterApp() {
               setOpen(true);
             }
           } else {
-            if (sketchRef.current) {
-              sketchRef.current.complete();
-            }
+            sketchRef.current.cancel();
           }
         });
       });
@@ -240,7 +238,9 @@ export default function InteractiveReporterApp() {
 
         <Drawer anchor="right" open={open} onClose={() => {
           setOpen(false);
-          if (sketchRef.current) sketchRef.current.complete();
+          if (sketchRef.current) sketchRef.current.cancel();
+          setSelectedFeature(null);
+          setDrawnGeometry(null);
         }}>
           <Box sx={{ width: 360, pt: 2, px: 2, pb: 1 }} role="presentation">
             <DialogTitle>Center Comment Form</DialogTitle>
@@ -276,7 +276,7 @@ export default function InteractiveReporterApp() {
               {isUserCreatedFeature && <Button onClick={handleDeleteSketch} color="secondary">DELETE SKETCH</Button>}
               <Button onClick={() => {
                 setOpen(false);
-                if (sketchRef.current) sketchRef.current.complete();
+                if (sketchRef.current) sketchRef.current.cancel();
                 setSelectedFeature(null);
                 setDrawnGeometry(null);
               }}>Cancel</Button>
