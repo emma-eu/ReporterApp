@@ -56,7 +56,7 @@ export default function InteractiveReporterApp() {
         ui: { components: ["zoom", "attribution"] },
       });
 
-      setView(view);
+      
 
       view.when(async () => {
         view.popup.autoOpenEnabled = false;
@@ -116,7 +116,7 @@ export default function InteractiveReporterApp() {
             });
             setEditingGraphic(userGraphic);
 
-            setSelectedFeature(userGraphic);
+            
             setDrawnGeometry(userGraphic.geometry);
             setOpen(true);
           }
@@ -132,7 +132,7 @@ export default function InteractiveReporterApp() {
 
             // Only open popup for user-drawn features
             if (isDrawn) {
-              setSelectedFeature(graphic);
+              
               setDrawnGeometry(graphic.geometry);
               setOpen(true);
             }
@@ -157,20 +157,20 @@ export default function InteractiveReporterApp() {
       url: "https://services6.arcgis.com/MLUVmF7LMfvzoHjV/arcgis/rest/services/CenterResponses/FeatureServer/0",
     });
 
-    const geometry = selectedFeature?.geometry || drawnGeometry;
+    const geometry = editingGraphic?.geometry || drawnGeometry;
     if (!geometry) return;
 
     const newFeature = {
       geometry,
       attributes: {
-        feature_origin: selectedFeature?.attributes?.feature_origin === 1 ? 1 : 0,
+        feature_origin: editingGraphic?.attributes?.feature_origin === 1 ? 1 : 0,
         name,
         organization,
         submittedcomment: comment,
         is_center: isCenter ? 1 : 0,
         priority_level: priorityLevel,
         submitted_at: new Date().toISOString(),
-        related_feature_id: selectedFeature?.attributes?.OBJECTID || null
+        related_feature_id: editingGraphic?.attributes?.OBJECTID || null
       },
     };
 
@@ -197,17 +197,16 @@ export default function InteractiveReporterApp() {
       sketchRef.current.layer.graphics.includes(editingGraphic)
     ) {
       sketchRef.current.cancel();
-                  sketchRef.current.cancel();
-                  sketchRef.current.layer.remove(editingGraphic);
-                  sketchRef.current.reset();
+      sketchRef.current.reset();
+      sketchRef.current.layer.remove(editingGraphic);
     }
     setEditingGraphic(null);
-    setisCenter(false);
+    setIsCenter(false);
     setOrganization("");
     setPriorityLevel("");
   };
 
-  const isUserCreatedFeature = selectedFeature?.attributes?.feature_origin === 1;
+  const isUserCreatedFeature = editingGraphic?.attributes?.feature_origin === 1;
 
   return (
     <Box display="flex" flexDirection="column" alignItems="center" p={4} pb={2}>
@@ -263,15 +262,15 @@ export default function InteractiveReporterApp() {
               <Button onClick={() => {
                 setOpen(false);
                 
-                setSelectedFeature(null);
-                setDrawnGeometry(null);
+                                setDrawnGeometry(null);
                 if (
                   sketchRef.current &&
                   editingGraphic &&
                   sketchRef.current.layer.graphics.includes(editingGraphic)
                 ) {
-                  sketchRef.current.layer.remove(editingGraphic);
+                  sketchRef.current.cancel();
                   sketchRef.current.reset();
+                  sketchRef.current.layer.remove(editingGraphic);
                 }
                 setEditingGraphic(null);
               }}>Cancel</Button>
