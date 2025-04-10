@@ -25,13 +25,16 @@ export default function InteractiveReporterApp() {
   const mapRef = useRef(null);
   const legendRef = useRef(null);
   const sketchRef = useRef(null);
-    const [editingGraphic, setEditingGraphic] = useState(null);
+  const [, setView] = useState(null);
+  const [editingGraphic, setEditingGraphic] = useState(null);
 
   const [open, setOpen] = useState(false);
-      const [name, setName] = useState("");
+  const [selectedFeature, setSelectedFeature] = useState(null);
+  const [drawnGeometry, setDrawnGeometry] = useState(null);
+  const [name, setName] = useState("");
   const [organization, setOrganization] = useState("");
   const [comment, setComment] = useState("");
-  const [isCenter, setIsCenter] = useState(false);
+  const [isCenter, setisCenter] = useState(false);
   const [priorityLevel, setPriorityLevel] = useState("");
 
   useEffect(() => {
@@ -55,7 +58,7 @@ export default function InteractiveReporterApp() {
         ui: { components: ["zoom", "attribution"] },
       });
 
-      
+      setView(view);
 
       view.when(async () => {
         view.popup.autoOpenEnabled = false;
@@ -115,8 +118,9 @@ export default function InteractiveReporterApp() {
             });
             setEditingGraphic(userGraphic);
 
-            
-                        setOpen(true);
+            setSelectedFeature(userGraphic);
+            setDrawnGeometry(userGraphic.geometry);
+            setOpen(true);
           }
         });
 
@@ -130,8 +134,9 @@ export default function InteractiveReporterApp() {
 
             // Only open popup for user-drawn features
             if (isDrawn) {
-              
-                            setOpen(true);
+              setSelectedFeature(graphic);
+              setDrawnGeometry(graphic.geometry);
+              setOpen(true);
             }
           }
         });
@@ -145,20 +150,6 @@ export default function InteractiveReporterApp() {
     if (sketchRef.current) sketchRef.current.create("polygon");
   };
 
-  
-
-const cleanUpSketch = () => {
-  if (
-    sketchRef.current &&
-    editingGraphic &&
-    sketchRef.current.layer.graphics.includes(editingGraphic)
-  ) {
-    sketchRef.current.cancel();
-    sketchRef.current.reset();
-    sketchRef.current.layer.remove(editingGraphic);
-  }
-  setEditingGraphic(null);
-};
   const handleSubmit = async () => {
     const [FeatureLayer] = await Promise.all([
       import("@arcgis/core/layers/FeatureLayer")
@@ -168,20 +159,20 @@ const cleanUpSketch = () => {
       url: "https://services6.arcgis.com/MLUVmF7LMfvzoHjV/arcgis/rest/services/CenterResponses/FeatureServer/0",
     });
 
-    const geometry = editingGraphic?.geometry;
+    const geometry = selectedFeature?.geometry || drawnGeometry;
     if (!geometry) return;
 
     const newFeature = {
       geometry,
       attributes: {
-        feature_origin: editingGraphic?.attributes?.feature_origin === 1 ? 1 : 0,
+        feature_origin: selectedFeature?.attributes?.feature_origin === 1 ? 1 : 0,
         name,
         organization,
         submittedcomment: comment,
         is_center: isCenter ? 1 : 0,
         priority_level: priorityLevel,
         submitted_at: new Date().toISOString(),
-        related_feature_id: editingGraphic?.attributes?.OBJECTID || null
+        related_feature_id: selectedFeature?.attributes?.OBJECTID || null
       },
     };
 
@@ -197,17 +188,27 @@ const cleanUpSketch = () => {
       console.error("Error submitting feature:", error);
     }
 
-    cleanUpSketch();
-    // Drawer will close after cleaning up
     setOpen(false);
+    
     setName("");
     setComment("");
-    setIsCenter(false);
+    setSelectedFeature(null);
+                setDrawnGeometry(null);
+    if (
+      sketchRef.current &&
+      editingGraphic &&
+      sketchRef.current.layer.graphics.includes(editingGraphic)
+    ) {
+      sketchRef.current.layer.remove(editingGraphic);
+      sketchRef.current.reset();
+    }
+    setEditingGraphic(null);
+    setisCenter(false);
     setOrganization("");
     setPriorityLevel("");
   };
 
-  const isUserCreatedFeature = editingGraphic?.attributes?.feature_origin === 1;
+  const isUserCreatedFeature = selectedFeature?.attributes?.feature_origin === 1;
 
   return (
     <Box display="flex" flexDirection="column" alignItems="center" p={4} pb={2}>
@@ -254,23 +255,27 @@ const cleanUpSketch = () => {
               </FormControl>
 
               {!isUserCreatedFeature && (
-                <FormControlLabel control={<Checkbox checked={isCenter} onChange={(e) => setIsCenter(e.target.checked)} />} label="This feature meets the characteristics of a center." />
+                <FormControlLabel control={<Checkbox checked={isCenter} onChange={(e) => setisCenter(e.target.checked)} />} label="This feature meets the characteristics of a center." />
               )}
 
               <TextField label="Comment Here (Optional)" fullWidth margin="dense" multiline rows={4} value={comment} onChange={(e) => setComment(e.target.value)} />
             </DialogContent>
             <DialogActions>
               <Button onClick={() => {
-      cleanUpSketch();
-      setOpen(false);
-      setName("");
-      setComment("");
-      setIsCenter(false);
-      setOrganization("");
-      setPriorityLevel("");
-    }}>
-      Cancel
-    </Button>
+                setOpen(false);
+                
+                setSelectedFeature(null);
+                setDrawnGeometry(null);
+                if (
+                  sketchRef.current &&
+                  editingGraphic &&
+                  sketchRef.current.layer.graphics.includes(editingGraphic)
+                ) {
+                  sketchRef.current.layer.remove(editingGraphic);
+                  sketchRef.current.reset();
+                }
+                setEditingGraphic(null);
+              }}>Cancel</Button>
               <Button onClick={handleSubmit} variant="contained" color="primary">Submit Feedback</Button>
             </DialogActions>
           </Box>
