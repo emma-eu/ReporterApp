@@ -109,7 +109,7 @@ export default function InteractiveReporterApp() {
           if (event.state === "complete") {
             const userGraphic = event.graphic;
             userGraphic.attributes = { feature_origin: 1 };
-            graphicsLayer.add(userGraphic);
+            // Removed this line to prevent duplicate graphics and allow sketch removal
 
             // Allow users to continue editing their shape
             sketch.update([userGraphic], {
