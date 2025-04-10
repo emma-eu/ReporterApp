@@ -193,7 +193,11 @@ export default function InteractiveReporterApp() {
     setName("");
     setComment("");
     setSelectedFeature(null);
-    setDrawnGeometry(null);
+                setDrawnGeometry(null);
+
+                if (sketchRef.current) {
+                  sketchRef.current.cancel();
+                }
     setisCenter(false);
     setOrganization("");
     setPriorityLevel("");
