@@ -118,9 +118,6 @@ export default function InteractiveReporterApp() {
         });
 
         view.on("click", async (event) => {
-          if (open && sketchRef.current?.update) {
-            sketchRef.current.update([], { tool: "reshape" });
-          }
           const response = await view.hitTest(event);
           const result = response.results.find((r) => r.graphic?.geometry);
           if (result) {
@@ -130,30 +127,32 @@ export default function InteractiveReporterApp() {
               setSelectedFeature(graphic);
               setDrawnGeometry(graphic.geometry);
               setOpen(true);
+              sketchRef.current.complete();
+              sketchRef.current.update([graphic], { tool: "reshape" });
             } else {
               const clonedGeometry = graphic.geometry.clone();
               const commentGraphic = new Graphic({
                 geometry: clonedGeometry,
                 attributes: {
                   feature_origin: 0,
-                  OBJECTID: graphic.attributes?.OBJECTID
-                }
+                  OBJECTID: graphic.attributes?.OBJECTID,
+                },
               });
               setSelectedFeature(commentGraphic);
               setDrawnGeometry(clonedGeometry);
               setOpen(true);
             }
           } else {
-            setOpen(false);
-            setSelectedFeature(null);
-            setDrawnGeometry(null);
+            if (sketchRef.current) {
+              sketchRef.current.complete();
+            }
           }
         });
       });
     };
 
     loadMap();
-  }, [open]);
+  }, []);
 
   const startDrawing = () => {
     if (sketchRef.current) sketchRef.current.create("polygon");
@@ -212,7 +211,7 @@ export default function InteractiveReporterApp() {
 
   const isUserCreatedFeature = selectedFeature?.attributes?.feature_origin === 1;
   const handleDeleteSketch = () => {
-    if (isUserCreatedFeature && !selectedFeature?.attributes?.OBJECTID && sketchRef.current) {
+    if (isUserCreatedFeature && !selectedFeature.attributes?.OBJECTID && sketchRef.current) {
       sketchRef.current.layer.remove(selectedFeature);
     }
     setOpen(false);
@@ -239,7 +238,10 @@ export default function InteractiveReporterApp() {
           </CardContent>
         </Card>
 
-        <Drawer anchor="right" open={open} onClose={() => setOpen(false)}>
+        <Drawer anchor="right" open={open} onClose={() => {
+          setOpen(false);
+          if (sketchRef.current) sketchRef.current.complete();
+        }}>
           <Box sx={{ width: 360, pt: 2, px: 2, pb: 1 }} role="presentation">
             <DialogTitle>Center Comment Form</DialogTitle>
             <DialogContent>
@@ -274,6 +276,7 @@ export default function InteractiveReporterApp() {
               {isUserCreatedFeature && <Button onClick={handleDeleteSketch} color="secondary">DELETE SKETCH</Button>}
               <Button onClick={() => {
                 setOpen(false);
+                if (sketchRef.current) sketchRef.current.complete();
                 setSelectedFeature(null);
                 setDrawnGeometry(null);
               }}>Cancel</Button>
