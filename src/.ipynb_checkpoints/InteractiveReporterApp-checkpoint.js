@@ -130,8 +130,25 @@ export default function InteractiveReporterApp() {
             const graphic = result.graphic;
             const isDrawn = graphic.attributes?.feature_origin === 1;
 
-            // Only open popup for user-drawn features
-            if (isDrawn) {
+            setSelectedFeature(graphic);
+            setDrawnGeometry(graphic.geometry);
+            setOpen(true);
+          }
+
+          if (result && !result.graphic.attributes?.feature_origin) {
+            const baseFeature = result.graphic;
+            const clonedGeometry = baseFeature.geometry.clone();
+            const commentGraphic = {
+              geometry: clonedGeometry,
+              attributes: {
+                feature_origin: 0,
+                OBJECTID: baseFeature.attributes?.OBJECTID
+              }
+            };
+            setSelectedFeature(commentGraphic);
+            setDrawnGeometry(clonedGeometry);
+            setOpen(true);
+          }
               setSelectedFeature(graphic);
               setDrawnGeometry(graphic.geometry);
               setOpen(true);
